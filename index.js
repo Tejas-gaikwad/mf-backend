@@ -10,10 +10,6 @@ const dbName = 'mf-db';  // Replace with your database name Mutual-fund database
 const PORT = process.env.PORT || 5000;
 
 async function main() {
-  // const client = new MongoClient(url, {
-
-  //   serverSelectionTimeoutMS: 5000, // Adjust the timeout as needed
-  // });
 
   try {
     await mongoose.connect(url);
@@ -25,12 +21,5 @@ async function main() {
     console.error(err);
   } 
 }
-
 main().catch(console.error);
-
 module.exports = app;
-
-
-
-
-
