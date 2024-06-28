@@ -1,10 +1,11 @@
-const{ AddClient, ListOfAllClients } = require('../controllers/client_controller');
+const{ AddClient, ListOfAllClients, FatcaDetails, AddUserDetails, AddBankDetails  } = require('../controllers/client_controller');
 const{ authenticateToken,  } = require('../middlewares/auth_middleware');
 const express = require('express');
 const router = express.Router();
-
-
 router.post('/add_client', authenticateToken, AddClient);
-router.get('/getAllClients', authenticateToken, ListOfAllClients);
-
+router.get('/getAllClients/:username', authenticateToken, ListOfAllClients);
+router.put('/:clientId/addfatcadetails', authenticateToken, FatcaDetails);
+router.put('/:clientId/addUserDetails', authenticateToken, AddUserDetails);
+router.put('/:clientId/addBankDetails', authenticateToken, AddBankDetails);
+// router.get('/fatcadetails', authenticateToken, FatcaDetails);
 module.exports = router;
