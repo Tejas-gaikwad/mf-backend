@@ -1,121 +1,254 @@
+const { router } = require('../app');
+const clientSchema = require('../models/client');
+const User = require('../models/user');
 
-// const users = [
-//     { username: 'tester', password: '12345', login_type: '007' },  // there are only two login type which are corporate/ifa and sub broker
-//     { username: 'user2', password: 'pass2', login_type: '008' }
-// ];
-
-const UserSchema = require('../models/user');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-
-const generateAccessToken = (user) => {
-    return jwt.sign({ id: user.id, username: user.username }, 'mutual_fund_jwt_secret_key', { expiresIn: '1h' }); // Replace with a strong secret key
-};
-  
- 
-const Login = async (req, res) => {
+const AddClient = async (req, res) => {
     try{
-        const {login_type, username, password} = req.body;
-        if(!login_type || !username || !password) {
-            return res.status(400).json({
-                message : "All fields are required",
-            });
+        const { username, name, email, phone, pan_number, date_of_birth, arn_number } = req.body;
+
+        if (!name || !email || !phone) {
+            return res.status(400).json({ message: 'Name, email, and phone are required' });
         }
-        if(login_type.toString() != "corporate" && login_type.toString() != "sub-broker") { // CHange this code of login_type to proper login type
-            return res.status(400).json({
-                message : "Please provide right login type!",
-            });
-        }
-        const user = await  UserSchema.findOne({ username, login_type }); 
+
+        const user = await User.findOne({username});
+
         if (!user) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return res.status(404).json({ message: 'User not found' });
         }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-          return res.status(401).json({ message: 'Invalid username or password' });
-        }
-        const accessToken = generateAccessToken(user);
-        res.status(200).json({ token: accessToken, message: 'Login successful' , user: { id: user.id, username: user.username } });
-    }catch(err) {
-        console.log('Error -------   '+err);
-        res.status(400).json({
-            "message" : "Error, Something went wrong."
-        });
-    }
-};
 
-const SendVerificationCode = (req, res) => {
-    try{
-        const { mobileNo } = req.body;
-    if(!mobileNo || mobileNo.length != 10) {
-        return res.status(400).json({
-            "messsage" : "Please provide valid mobile number",
-        });
-    }
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    req.session.verificationCode = verificationCode;
-    console.log("verificationCode ----   "+verificationCode);
-    
-    // client.messages.create({
-    //     body: `Your verification code is ${verificationCode}`,
-    //     to: phoneNumber, // Text this number
-    //     from: 'your_twilio_phone_number' // From a valid Twilio number
-    // }).then((message) => {
-    //     res.status(200).json({ message: 'Verification code sent successfully', sid: message.sid });
-    // }).catch((error) => {
-    //     res.status(500).json({ message: 'Failed to send verification code', error: error.message });
-    // });
-    
-    // TODO add twilio client here.
-    res.status(200).json({
-        "message" : "Verification code sent successfully."
-    });
-    } catch(err) {
-        console.log('Error -------   '+err);
+          
+        const existingClient = await clientSchema.findOne({ phone });
+        if (existingClient) {
+        return res.status(400).json({ message: 'Client with this phone number already exists' });
+        }
+
+        const client = new clientSchema({ username, arn_number, name, email, phone, pan_number, date_of_birth });
+
+        const savedClient = await client.save();
+
+        if (!user.clients) {
+            user.clients = [];
+          }
+
+
+        user.clients.push(savedClient._id);
+
+
+        await user.save();
+
+        res.status(201).json({ message: 'Client added successfully', client: savedClient });
+
+    } catch(err){
+        console.log("err --   ", err);
         res.status(400).json({
             "message" : "Error, Something went wrong."
         });
     }
 }
 
-const VerifyCode = (req, res) => {
-   try{
-    const { verificationCode } = req.body;
-  
-    // Check if the code matches the one stored in the session
-    if (verificationCode === req.session.verificationCode) {
-      res.status(200).json({ message: 'Verification successful' });
-    } else {
-      res.status(400).json({ message: 'Invalid verification code' });
-    }
-    } catch(err) {
-        console.log('Error -------   '+err);
-        res.status(400).json({
-            "message" : "Error, Something went wrong."
-        });
-    }
-  };
+const ListOfAllClients = async (req, res) => {
+    try {
+      const username = req.user.username;
 
-
-const BecomeMember = async (req, res) => {
-    try{
-        const {username, arnNumber, mobile, city, login_type, password} = req.body;
-        if(!username || !mobile ){
-            return res.status(400).json({
-                "message":"please provide all data",
-            });
-        }
-        const user = new UserSchema({ username, arnNumber, mobile, city, login_type, password,});
-        const response = await user.save();
-        res.status(201).json(response);
-        } catch(err){
-            console.log('Error -------   '+err);
-            if (err.code === 11000) {
-                res.status(400).json({ message: 'Please enter unique values.' });
-              } else {
-                res.status(400).json({ message: 'Error, Something went wrong.' });
-              }
-        }
+      const data = await User.findOne({username}).populate('clients').exec();
+      if (!data) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.status(200).json({ clients: data.clients });
+    } catch (error) {
+      console.error('Error getting clients:', error);
+      res.status(500).json({ message: 'Failed to get clients' });
+    }
 }
 
-module.exports = { Login, SendVerificationCode, BecomeMember, VerifyCode };
+const FatcaDetails = async (req, res) => {
+  try{
+      // const { bith_place, birth_country, wealth_source, politically_exposed_person, address_type, residence_country, income_slab } = req.body;
+      const fatcaDetails = req.body;
+      const { clientId } = req.params;
+
+      if (!fatcaDetails) {
+          return res.status(400).json({ message: 'Please provide all details' });
+      }
+
+      console.log("clientId --------  "+ clientId);
+      console.log("fatcaDetails --------  "+ fatcaDetails);
+
+      const client = await clientSchema.findById( clientId );
+
+      console.log("client --------  "+ client);
+
+      if (!client) {
+        return res.status(400).json({ message: 'Client not found.'});
+      }
+
+      client.fatca_detials = fatcaDetails;
+      await client.save();
+
+      res.status(201).json({ message: 'Fatca details added successfully', client: client });
+
+  } catch(err){
+      console.log("err --   ", err);
+      res.status(400).json({
+          "message" : "Error, Something went wrong."
+      });
+  }
+}
+
+const AddUserDetails = async (req, res) => {
+  try{
+      // const { bith_place, birth_country, wealth_source, politically_exposed_person, address_type, residence_country, income_slab } = req.body;
+      const userDetails = req.body;
+      const { clientId } = req.params;
+
+      if (!userDetails) {
+          return res.status(400).json({ message: 'Please provide all details' });
+      }
+
+      console.log("clientId --------  "+ clientId);
+      console.log("userDetails --------  "+ userDetails);
+
+      const client = await clientSchema.findById( clientId );
+
+      console.log("client --------  "+ client);
+
+      if (!client) {
+        return res.status(400).json({ message: 'Client not found.'});
+      }
+
+      client.user_details = userDetails;
+      await client.save();
+
+      res.status(201).json({ message: 'User details added successfully', client: client });
+
+  } catch(err){
+      console.log("err --   ", err);
+      res.status(400).json({
+          "message" : "Error, Something went wrong."
+      });
+  }
+}
+
+const AddBankDetails = async (req, res) => {
+  try{
+      // const { bith_place, birth_country, wealth_source, politically_exposed_person, address_type, residence_country, income_slab } = req.body;
+      const bankDetails = req.body;
+      const { clientId } = req.params;
+
+      if (!bankDetails) {
+          return res.status(400).json({ message: 'Please provide all details' });
+      }
+
+      console.log("clientId --------  "+ clientId);
+      console.log("bankDetails --------  "+ bankDetails);
+
+      const client = await clientSchema.findById( clientId );
+
+      console.log("client --------  "+ client);
+
+      if (!client) {
+        return res.status(400).json({ message: 'Client not found.'});
+      }
+
+      client.bank_details = bankDetails;
+      await client.save();
+
+      res.status(201).json({ message: 'Bank details added successfully', client: client });
+
+  } catch(err){
+      console.log("err --   ", err);
+      res.status(400).json({
+          "message" : "Error, Something went wrong."
+      });
+  }
+}
+
+const ClientDeskSettings = async (req, res) => {
+  try{
+      const clientDeskSettings = req.body;
+      const { clientId } = req.params;
+
+      if (!clientDeskSettings) {
+          return res.status(400).json({ message: 'Please provide all details' });
+      }
+
+      const client = await clientSchema.findById( clientId );
+
+      if (!client) {
+        return res.status(400).json({ message: 'Client not found.'});
+      }
+
+      client.client_desk_settings = clientDeskSettings;
+      await client.save();
+
+      res.status(201).json({ message: 'Bank details added successfully', client: client });
+
+  } catch(err){
+      console.log("err --   ", err);
+      res.status(400).json({
+          "message" : "Error, Something went wrong."
+      });
+  }
+}
+
+const submitBSERegistration = async (req, res) => {
+  // TODO add logic here to make submission 
+}
+
+const sendClientLoginCredentials = async (req, res) => {
+  // TODO add logic here to make submission 
+}
+
+const GetClientReport = async (req, res ) => {
+  try{
+      const username = req.user.username;
+
+      console.log("username 2 -------   "+username);
+
+      if(username){
+
+        const clientId = req.body.clientId;
+        const report_type = req.body.reportType;
+
+        
+      console.log("clientId -------   "+clientId);
+      console.log("report_type -------   "+report_type);
+
+        if(report_type == "mutual_fund") {
+          const clientData = await clientSchema.findById(clientId);
+          console.log("clientData  ----    "+clientData);
+          console.log("clientData['mutual_funds']  ----    "+clientData.mutual_funds);
+          const mutualFundIds = clientData.mutual_funds.map(id => ObjectId(id));
+          console.log("mutualFundIds  ----    "+mutualFundIds);
+          // const mutualFundsCollection = db.collection('mutual_funds'); 
+          // const mutualFunds = await mutualFundsCollection.find({ _id: { $in: mutualFundIds } }).toArray();
+          // return { ...profile, mutual_funds: mutualFunds };
+          for(var i in clientData['mutual_funds']) {
+
+          }
+
+           res.status(201).json({
+            "clientData" : clientData.mutual_funds,
+          });
+        }
+        
+
+      } else{
+          res.status(400).json({
+              "message" : "Invalid Authentication."
+          }); 
+      }
+  }catch(err){
+      console.log("error" + err);
+       res.status(400).json({
+          "message" : "Error, Something went wrong."
+      });
+  }
+}
+
+const getMutualFundReportFromDatabase = async ( clientId) => {
+
+}
+
+
+module.exports ={ AddClient, ListOfAllClients, FatcaDetails, AddUserDetails, AddBankDetails, ClientDeskSettings, GetClientReport};
