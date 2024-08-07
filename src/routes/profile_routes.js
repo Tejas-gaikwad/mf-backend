@@ -3,7 +3,7 @@ const{ authenticateToken,  } = require('../middlewares/auth_middleware');
 const express = require('express');
 const router = express.Router();
 
-router.get('/get_profile/:username', authenticateToken, GetUserProfile);
+router.get('/get_profile/', authenticateToken, GetUserProfile);
 
 
 module.exports = router;

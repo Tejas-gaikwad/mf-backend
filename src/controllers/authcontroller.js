@@ -26,7 +26,7 @@ const Login = async (req, res) => {
                 message : "Please provide right login type!",
             });
         }
-        const user = await  UserSchema.findOne({ username, login_type } ); 
+        const user = await  UserSchema.findOne({ username, login_type }); 
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
@@ -55,6 +55,7 @@ const SendVerificationCode = (req, res) => {
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     req.session.verificationCode = verificationCode;
     console.log("verificationCode ----   "+verificationCode);
+    
     // client.messages.create({
     //     body: `Your verification code is ${verificationCode}`,
     //     to: phoneNumber, // Text this number
@@ -64,6 +65,7 @@ const SendVerificationCode = (req, res) => {
     // }).catch((error) => {
     //     res.status(500).json({ message: 'Failed to send verification code', error: error.message });
     // });
+    
     // TODO add twilio client here.
     res.status(200).json({
         "message" : "Verification code sent successfully."

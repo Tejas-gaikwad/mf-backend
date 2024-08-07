@@ -1,5 +1,6 @@
 // models/Client.js
 const mongoose = require('mongoose');
+
 const userDetailsSchema = new mongoose.Schema({
     first_name: String,
     middle_name: String,
@@ -25,7 +26,10 @@ const userDetailsSchema = new mongoose.Schema({
     applicant_pincode: String,
     applicant_state: String,
     applicant_country: String,
+
 });
+
+
 const fatcaSchema = new mongoose.Schema({
     bith_place: String,
     birth_country: String,
@@ -35,11 +39,25 @@ const fatcaSchema = new mongoose.Schema({
     residence_country: String,
     income_slab: String,
 });
+
 const bankDetailsSchema = new mongoose.Schema({
     account_number: String,
     account_type: String,
     ifsc_code: String,
 });
+
+const clientDeskSettingsSchema = new mongoose.Schema({
+    arn_number: String,
+    allow_all_transactions_on_client_desk: Boolean,
+    allow_all_redemptions_on_client_desk: Boolean,
+});
+
+const uploadedDocumentsSchema = new mongoose.Schema({
+    applicant_signature: { type: String, required: true },
+    applicant_cancel_cheque: String,
+
+});
+
 const clientSchema = new mongoose.Schema({
     username: { type: String, ref: 'Users', required: true },
     arn_number : { type: String, required : true},
@@ -51,5 +69,8 @@ const clientSchema = new mongoose.Schema({
     user_details: userDetailsSchema,
     fatca_detials : fatcaSchema,
     bank_details : bankDetailsSchema,
+    client_desk_settings : clientDeskSettingsSchema,
+    upload_documents : uploadedDocumentsSchema,
 });
+
 module.exports = mongoose.model('Client', clientSchema);
