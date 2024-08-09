@@ -206,20 +206,14 @@ const GetClientReport = async (req, res ) => {
   try{
       const username = req.user.username;
 
-      console.log("username 2 -------   "+username);
-
       if(username){
 
         const clientId = req.body.clientId;
         const report_type = req.body.reportType;
 
         
-      console.log("clientId -------   "+clientId);
-      console.log("report_type -------   "+report_type);
-
         if(report_type == "mutual_fund") {
           const clientData = await clientSchema.findById(clientId);
-    
           
           if (!clientData) {
 

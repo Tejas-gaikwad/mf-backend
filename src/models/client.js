@@ -65,6 +65,7 @@ const clientSchema = new mongoose.Schema({
     email: { type: String, required: true },
     phone: { type: String, required: true },
     pan_number: { type: String, required: true },
+    mutual_funds: {type: Array},
     birth_date: { type: String,},
     user_details: userDetailsSchema,
     fatca_detials : fatcaSchema,
