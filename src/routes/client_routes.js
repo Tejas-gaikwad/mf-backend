@@ -5,7 +5,7 @@ const router = express.Router();
 
 
 router.post('/add_client', authenticateToken, AddClient);
-router.get('/getAllClients', authenticateToken, ListOfAllClients);
+router.get('/getAllClients/', authenticateToken, ListOfAllClients);
 router.put('/:clientId/addfatcadetails', authenticateToken, FatcaDetails);
 router.put('/:clientId/addUserDetails', authenticateToken, AddUserDetails);
 router.put('/:clientId/addBankDetails', authenticateToken, AddBankDetails);

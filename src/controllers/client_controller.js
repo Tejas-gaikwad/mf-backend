@@ -1,6 +1,9 @@
 const { router } = require('../app');
 const clientSchema = require('../models/client');
 const User = require('../models/user');
+const mongoose = require('mongoose');
+const mutualFund = require('../models/mutual_fund');
+
 
 const AddClient = async (req, res) => {
     try{
@@ -216,22 +219,51 @@ const GetClientReport = async (req, res ) => {
 
         if(report_type == "mutual_fund") {
           const clientData = await clientSchema.findById(clientId);
-          console.log("clientData  ----    "+clientData);
-          console.log("clientData['mutual_funds']  ----    "+clientData.mutual_funds);
-          const mutualFundIds = clientData.mutual_funds.map(id => ObjectId(id));
-          console.log("mutualFundIds  ----    "+mutualFundIds);
-          // const mutualFundsCollection = db.collection('mutual_funds'); 
-          // const mutualFunds = await mutualFundsCollection.find({ _id: { $in: mutualFundIds } }).toArray();
-          // return { ...profile, mutual_funds: mutualFunds };
-          for(var i in clientData['mutual_funds']) {
+    
+          
+          if (!clientData) {
 
+            return res.status(400).json({ error: 'Not valid Client.' });
+
+          } else {
+            if (!clientData.mutual_funds) {
+
+              return res.status(400).json({ error: 'No Mutual Fund data Found.' });
+
+            } else {
+              const mutualFundsList = clientData.mutual_funds;
+              console.log(mutualFundsList);
+
+              if (!Array.isArray(mutualFundsList) || mutualFundsList.some(id => !mongoose.Types.ObjectId.isValid(id))) {
+                return res.status(400).json({ error: 'Invalid ID format' });
+              }
+             
+
+              const objectIds = mutualFundsList.map(id => new  mongoose.Types.ObjectId(id));
+
+
+              const mutualFunds =  await mutualFund.find({
+                _id: { $in: objectIds }
+              }).exec();
+
+
+              const results = mutualFunds.map(fund => ({
+                _id: fund._id,
+                investment_cost: fund.investment_cost.toString(),
+                current_cost: fund.current_cost.toString(),
+                absolute_return: fund.absolute_return,
+                XIRR: fund.XIRR.toString(),
+                today_PnL: fund.today_PnL.toString(),
+                total_PnL: fund.total_PnL.toString()
+              }));
+
+    
+              return res.status(201).json({
+                  "mutualFund" : results,
+                });
+            }
           }
-
-           res.status(201).json({
-            "clientData" : clientData.mutual_funds,
-          });
         }
-        
 
       } else{
           res.status(400).json({
