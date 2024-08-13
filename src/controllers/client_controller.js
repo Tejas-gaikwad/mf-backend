@@ -82,7 +82,7 @@ const FatcaDetails = async (req, res) => {
       if (!client.fatca_detials) {
         client.fatca_detials = newFatcaDetails;
         await client.save();
-        return res.status(400).json({ message: 'Fatca details added successfully', client: client });
+        return res.status(200).json({ message: 'Fatca details added successfully', client: client });
       }
 
       client.fatca_detials = {
@@ -119,7 +119,7 @@ const AddUserDetails = async (req, res) => {
     if (!client.user_details) {
       client.user_details = newUserDetails;
       await client.save();
-      return res.status(400).json({ message: 'User details added successfully', client: client });
+      return res.status(200).json({ message: 'User details added successfully', client: client });
     }
 
     client.user_details = {
@@ -160,7 +160,7 @@ const AddBankDetails = async (req, res) => {
 
       client.bank_details = newBankDetails;
       await client.save();
-      return res.status(400).json({ message: 'Bank details added successfully', client: client });
+      return res.status(200).json({ message: 'Bank details added successfully', client: client });
     }
 
     client.bank_details = {
