@@ -67,10 +67,10 @@ const ListOfAllClients = async (req, res) => {
 const FatcaDetails = async (req, res) => {
   try{
       // const { bith_place, birth_country, wealth_source, politically_exposed_person, address_type, residence_country, income_slab } = req.body;
-      const fatcaDetails = req.body;
+      const newFatcaDetails = req.body;
       const { clientId } = req.params;
 
-      if (!fatcaDetails) {
+      if (!newFatcaDetails) {
           return res.status(400).json({ message: 'Please provide all details' });
       }
 
@@ -79,10 +79,20 @@ const FatcaDetails = async (req, res) => {
         return res.status(400).json({ message: 'Client not found.'});
       }
 
-      client.fatca_detials = fatcaDetails;
+      if (!client.fatca_detials) {
+        client.fatca_detials = newFatcaDetails;
+        await client.save();
+        return res.status(400).json({ message: 'Fatca details added successfully', client: client });
+      }
+
+      client.fatca_detials = {
+        ...client.fatca_detials.toObject(),  
+        ...newFatcaDetails,  
+      };
+
       await client.save();
 
-      res.status(201).json({ message: 'Fatca details added successfully', client: client });
+      return res.status(201).json({ message: 'Fatca details added successfully', client: client });
 
   } catch(err){
       console.log("err --   ", err);
@@ -94,21 +104,33 @@ const FatcaDetails = async (req, res) => {
 
 const AddUserDetails = async (req, res) => {
   try{
-      const newUserDetails = req.body;
-      const { clientId } = req.params;
-      if (!newUserDetails) {
-          return res.status(400).json({ message: 'Please provide all details' });
-      }
-      const client = await clientSchema.findByIdAndUpdate( clientId );
-      if (!client) {
-        return res.status(400).json({ message: 'Client not found.'});
-      }
-      client.user_details = {
-        ...client.user_details.toObject(),  
-        ...newUserDetails,  
-      };
+    const newUserDetails = req.body;
+    const { clientId } = req.params;
+
+    if (!newUserDetails) {
+        return res.status(400).json({ message: 'Please provide all details' });
+    }
+
+    const client = await clientSchema.findByIdAndUpdate( clientId );
+    if (!client) {
+      return res.status(400).json({ message: 'Client not found.'});
+    }
+
+    if (!client.user_details) {
+      client.user_details = newUserDetails;
       await client.save();
-      res.status(201).json({ message: 'User details added successfully', client: client });
+      return res.status(400).json({ message: 'User details added successfully', client: client });
+    }
+
+    client.user_details = {
+      ...client.user_details.toObject(),  
+      ...newUserDetails,  
+    };
+
+    await client.save();
+
+    return res.status(201).json({ message: 'User details updated successfully', client: client });
+
   } catch(err) {
       console.log("err --   ", err);
       res.status(400).json({
@@ -119,17 +141,26 @@ const AddUserDetails = async (req, res) => {
 
 const AddBankDetails = async (req, res) => {
   try{
-      const newBankDetails = req.body;
-      const { clientId } = req.params;
+    
 
-      if (!newBankDetails) {
-          return res.status(400).json({ message: 'Please provide all details' });
-      }
 
-    const client = await clientSchema.findById(clientId);
+
+    const newBankDetails = req.body;
+    const { clientId } = req.params;
+    if (!newBankDetails) {
+        return res.status(400).json({ message: 'Please provide all details' });
+    }
+    const client = await clientSchema.findByIdAndUpdate( clientId );
 
     if (!client) {
-      return res.status(404).json({ message: 'Client not found.' });  // Use 404 for not found
+      return res.status(400).json({ message: 'Client not found.'});
+    }
+
+    if (!client.bank_details) {
+
+      client.bank_details = newBankDetails;
+      await client.save();
+      return res.status(400).json({ message: 'Bank details added successfully', client: client });
     }
 
     client.bank_details = {
@@ -139,10 +170,10 @@ const AddBankDetails = async (req, res) => {
 
     await client.save();
 
-    res.status(201).json({ message: 'Bank details added successfully', client: client });
+    return res.status(201).json({ message: 'Bank details updated successfully', client: client });
+
 
   } catch(err){
-      console.log("err --   ", err);
       res.status(400).json({
           "message" : "Error, Something went wrong."
       });
@@ -188,18 +219,14 @@ const sendClientLoginCredentials = async (req, res) => {
 const GetClientMFReport = async (req, res ) => {
   try{
 
-
         const clientId = req.body.clientId;
         const report_type = req.body.reportType;
 
         if(report_type == "mutual_fund") {
           const clientData = await clientSchema.findById(clientId);
-    
-          
+  
           if (!clientData) {
-
             return res.status(400).json({ error: 'Not valid Client.' });
-
           } else {
             if (!clientData.mutual_funds) {
               return res.status(400).json({ error: 'No Mutual Fund data Found.' });
