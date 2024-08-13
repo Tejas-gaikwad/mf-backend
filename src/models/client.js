@@ -27,7 +27,7 @@ const userDetailsSchema = new mongoose.Schema({
     applicant_state: String,
     applicant_country: String,
 
-});
+}, { _id: false });
 
 
 const fatcaSchema = new mongoose.Schema({
@@ -38,25 +38,26 @@ const fatcaSchema = new mongoose.Schema({
     address_type: String,
     residence_country: String,
     income_slab: String,
-});
+}, { _id: false });
 
 const bankDetailsSchema = new mongoose.Schema({
     account_number: String,
     account_type: String,
     ifsc_code: String,
-});
+    bank_name : String,
+}, { _id: false });
 
 const clientDeskSettingsSchema = new mongoose.Schema({
     arn_number: String,
     allow_all_transactions_on_client_desk: Boolean,
     allow_all_redemptions_on_client_desk: Boolean,
-});
+}, { _id: false });
 
 const uploadedDocumentsSchema = new mongoose.Schema({
     applicant_signature: { type: String, required: true },
     applicant_cancel_cheque: String,
 
-});
+}, { _id: false });
 
 const clientSchema = new mongoose.Schema({
     username: { type: String, ref: 'Users', required: true },

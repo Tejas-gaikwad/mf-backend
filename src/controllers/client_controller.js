@@ -74,13 +74,7 @@ const FatcaDetails = async (req, res) => {
           return res.status(400).json({ message: 'Please provide all details' });
       }
 
-      console.log("clientId --------  "+ clientId);
-      console.log("fatcaDetails --------  "+ fatcaDetails);
-
-      const client = await clientSchema.findById( clientId );
-
-      console.log("client --------  "+ client);
-
+      const client = await clientSchema.findByIdAndUpdate( clientId );
       if (!client) {
         return res.status(400).json({ message: 'Client not found.'});
       }
@@ -100,31 +94,22 @@ const FatcaDetails = async (req, res) => {
 
 const AddUserDetails = async (req, res) => {
   try{
-      // const { bith_place, birth_country, wealth_source, politically_exposed_person, address_type, residence_country, income_slab } = req.body;
-      const userDetails = req.body;
+      const newUserDetails = req.body;
       const { clientId } = req.params;
-
-      if (!userDetails) {
+      if (!newUserDetails) {
           return res.status(400).json({ message: 'Please provide all details' });
       }
-
-      console.log("clientId --------  "+ clientId);
-      console.log("userDetails --------  "+ userDetails);
-
-      const client = await clientSchema.findById( clientId );
-
-      console.log("client --------  "+ client);
-
+      const client = await clientSchema.findByIdAndUpdate( clientId );
       if (!client) {
         return res.status(400).json({ message: 'Client not found.'});
       }
-
-      client.user_details = userDetails;
+      client.user_details = {
+        ...client.user_details.toObject(),  
+        ...newUserDetails,  
+      };
       await client.save();
-
       res.status(201).json({ message: 'User details added successfully', client: client });
-
-  } catch(err){
+  } catch(err) {
       console.log("err --   ", err);
       res.status(400).json({
           "message" : "Error, Something went wrong."
@@ -134,29 +119,27 @@ const AddUserDetails = async (req, res) => {
 
 const AddBankDetails = async (req, res) => {
   try{
-      // const { bith_place, birth_country, wealth_source, politically_exposed_person, address_type, residence_country, income_slab } = req.body;
-      const bankDetails = req.body;
+      const newBankDetails = req.body;
       const { clientId } = req.params;
 
-      if (!bankDetails) {
+      if (!newBankDetails) {
           return res.status(400).json({ message: 'Please provide all details' });
       }
 
-      console.log("clientId --------  "+ clientId);
-      console.log("bankDetails --------  "+ bankDetails);
+    const client = await clientSchema.findById(clientId);
 
-      const client = await clientSchema.findById( clientId );
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found.' });  // Use 404 for not found
+    }
 
-      console.log("client --------  "+ client);
+    client.bank_details = {
+      ...client.bank_details.toObject(),  
+      ...newBankDetails,  
+    };
 
-      if (!client) {
-        return res.status(400).json({ message: 'Client not found.'});
-      }
+    await client.save();
 
-      client.bank_details = bankDetails;
-      await client.save();
-
-      res.status(201).json({ message: 'Bank details added successfully', client: client });
+    res.status(201).json({ message: 'Bank details added successfully', client: client });
 
   } catch(err){
       console.log("err --   ", err);
@@ -184,7 +167,7 @@ const ClientDeskSettings = async (req, res) => {
       client.client_desk_settings = clientDeskSettings;
       await client.save();
 
-      res.status(201).json({ message: 'Bank details added successfully', client: client });
+      res.status(201).json({ message: 'Client Desk Settings updated successfully', client: client });
 
   } catch(err){
       console.log("err --   ", err);
@@ -202,18 +185,16 @@ const sendClientLoginCredentials = async (req, res) => {
   // TODO add logic here to make submission 
 }
 
-const GetClientReport = async (req, res ) => {
+const GetClientMFReport = async (req, res ) => {
   try{
-      const username = req.user.username;
 
-      if(username){
 
         const clientId = req.body.clientId;
         const report_type = req.body.reportType;
 
-        
         if(report_type == "mutual_fund") {
           const clientData = await clientSchema.findById(clientId);
+    
           
           if (!clientData) {
 
@@ -221,12 +202,60 @@ const GetClientReport = async (req, res ) => {
 
           } else {
             if (!clientData.mutual_funds) {
+              return res.status(400).json({ error: 'No Mutual Fund data Found.' });
+
+            } else {
+              const mutualFundsList = clientData.mutual_funds;
+              if (!Array.isArray(mutualFundsList) || mutualFundsList.some(id => !mongoose.Types.ObjectId.isValid(id))) {
+                return res.status(400).json({ error: 'Invalid ID format' });
+              }
+              const objectIds = mutualFundsList.map(id => new  mongoose.Types.ObjectId(id));
+              const mutualFunds =  await mutualFund.find({
+                _id: { $in: objectIds }
+              }).exec();
+              const results = mutualFunds.map(fund => ({
+                _id: fund._id,
+                investment_cost: fund.investment_cost.toString(),
+                current_cost: fund.current_cost.toString(),
+                absolute_return: fund.absolute_return,
+                XIRR: fund.XIRR.toString(),
+                today_PnL: fund.today_PnL.toString(),
+                total_PnL: fund.total_PnL.toString()
+              }));
+
+    
+              return res.status(201).json({
+                  "mutualFund" : results,
+                });
+            }
+          }
+        }
+
+      
+  }catch(err){
+       res.status(400).json({
+          "message" : "Error, Something went wrong."
+      });
+  }
+}
+
+const addClientMutualFundData = async (req, res ) => {
+  try{
+      
+      
+          const clientId = req.body.clientId;
+          const clientData = await clientSchema.findById(clientId);
+      
+          if (!clientData) {
+            return res.status(400).json({ error: 'Not valid Client.' });
+          } else {
+            if (!clientData.mutual_funds) {
+
 
               return res.status(400).json({ error: 'No Mutual Fund data Found.' });
 
             } else {
               const mutualFundsList = clientData.mutual_funds;
-              console.log(mutualFundsList);
 
               if (!Array.isArray(mutualFundsList) || mutualFundsList.some(id => !mongoose.Types.ObjectId.isValid(id))) {
                 return res.status(400).json({ error: 'Invalid ID format' });
@@ -257,6 +286,50 @@ const GetClientReport = async (req, res ) => {
                 });
             }
           }
+       
+
+      
+  }catch(err){
+       res.status(400).json({
+          "message" : "Error, Something went wrong."
+      });
+  }
+}
+
+
+
+
+
+const GetClientWealthReport = async (req, res ) => {
+  try{
+      const username = req.user.username;
+
+
+      if(username){
+
+        const clientId = req.body.clientId;
+        const report_type = req.body.reportType;
+
+        
+        if(report_type == "wealth") {
+          const clientData = await clientSchema.findById(clientId);
+          
+          if (!clientData) {
+            return res.status(400).json({ error: 'Not valid Client.' });
+          } else {
+            if (!clientData.wealth_report) {
+              return res.status(400).json({ error: 'No Mutual Fund data Found.' });
+            } else {
+              const wealthReport = clientData.wealth_report;
+              if (!Array.isArray(mutualFundsList) || mutualFundsList.some(id => !mongoose.Types.ObjectId.isValid(id))) {
+                return res.status(400).json({ error: 'Invalid ID format' });
+              }
+              const objectIds = mutualFundsList.map(id => new  mongoose.Types.ObjectId(id));
+              return res.status(201).json({
+                  "mutualFund" : results,
+                });
+            }
+          }
         }
 
       } else{
@@ -277,4 +350,4 @@ const getMutualFundReportFromDatabase = async ( clientId) => {
 }
 
 
-module.exports ={ AddClient, ListOfAllClients, FatcaDetails, AddUserDetails, AddBankDetails, ClientDeskSettings, GetClientReport};
+module.exports ={ AddClient, ListOfAllClients, FatcaDetails, AddUserDetails, AddBankDetails, ClientDeskSettings, GetClientMFReport, GetClientWealthReport};

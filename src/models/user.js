@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
     login_type : {type: String, required : true, },
     password : {type: String, required : true},
     clients: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Client', default: [] }],
+    notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'notifications', default: [] }],
   });
 
 userSchema.pre('save', async function (next) {
