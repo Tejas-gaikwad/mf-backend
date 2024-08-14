@@ -1,14 +1,15 @@
-const UserSchema = require('../models/user');
+const InvestorSchema = require('../models/investor');
 const Notifications = require('../models/notification');
 
-const GetUserProfile = async (req, res, next) => {
+const GetInvestorProfile = async (req, res, next) => {
     try{
-        const username = req.user.username;
-        const user = await  UserSchema.findOne({username});  
-        if (!user) {
-          return res.status(404).json({ message: 'User not found' });
+        const investor_uid = req.investor.investor_uid;
+        console.log("investor_uid ---------    "+investor_uid);
+        const investor = await  InvestorSchema.findOne({investor_uid});  
+        if (!investor) {
+          return res.status(404).json({ message: 'investor not found' });
         }
-        res.status(200).json({ user });
+        res.status(200).json({ investor });
 
     }catch(err) {
       console.log("error" + err);
@@ -21,16 +22,19 @@ const GetUserProfile = async (req, res, next) => {
 
 const GetNotifications = async (req, res, next) => {
   try{
-      const username = req.user.username;
-      const user = await UserSchema.findOne({ username }).populate('notifications'); // Populate notifications field
-      if (!user) {
-          return res.status(404).json({ message: 'User not found' });
+      const investor_uid = req.investor.investor_uid;
+      console.log("investor_uid ---------    "+investor_uid);
+
+      const investor = await InvestorSchema.findOne({ investor_uid }).populate('notifications'); // Populate notifications field
+
+      if (!investor) {
+          return res.status(404).json({ message: 'Investor not found' });
       }
 
       // Return the notifications
       return res.status(200).json({
           message: 'Notifications retrieved successfully',
-          notifications: user.notifications,
+          notifications: investor.notifications,
       });
 
 
@@ -46,14 +50,14 @@ const GetNotifications = async (req, res, next) => {
 const SendNotification = async (req, res, next) => {
 
   try{
-      const { username, notification_heading, notification_content, notification_date } = req.body;
-      console.log("username ---------    "+username);
-      const user = await  UserSchema.findOne({username});  
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+      const { investor_uid, notification_heading, notification_content, notification_date } = req.body;
+      console.log("investor_uid ---------    "+investor_uid);
+      const investor = await  InvestorSchema.findOne({investor_uid});  
+      if (!investor) {
+        return res.status(404).json({ message: 'Investor not found' });
       }
 
-      console.log("user _id ---------    "+user._id);
+      console.log("investor _id ---------    "+investor._id);
 
 
       const newNotification = new Notifications({
@@ -65,8 +69,8 @@ const SendNotification = async (req, res, next) => {
 
       const savedNotification = await newNotification.save();
 
-      await UserSchema.findByIdAndUpdate(
-        user._id,
+      await InvestorSchema.findByIdAndUpdate(
+        investor._id,
         { $push: { notifications: savedNotification._id } }, // Add notification ID to the notifications array
         { new: true } // Return the updated document
       );  
@@ -85,4 +89,4 @@ const SendNotification = async (req, res, next) => {
   }
 };
 
-module.exports = {GetUserProfile, GetNotifications, SendNotification };
+module.exports = {GetInvestorProfile, GetNotifications, SendNotification };

@@ -1,4 +1,4 @@
-const{ SIPCalculator,  } = require('../controllers/authcontroller');
+const{ SIPCalculator,  } = require('../controllers/');
 const express = require('express');
 const router = express.Router();
 

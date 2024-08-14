@@ -1,22 +1,22 @@
 
 // const users = [
-//     { username: 'tester', password: '12345', login_type: '007' },  // there are only two login type which are corporate/ifa and sub broker
-//     { username: 'user2', password: 'pass2', login_type: '008' }
+//     { investor_uid: 'tester', password: '12345', login_type: '007' },  // there are only two login type which are corporate/ifa and sub broker
+//     { investor_uid: 'user2', password: 'pass2', login_type: '008' }
 // ];
 
-const UserSchema = require('../models/user');
+const InvestorSchema = require('../models/investor');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const generateAccessToken = (user) => {
-    return jwt.sign({ id: user.id, username: user.username }, 'mutual_fund_jwt_secret_key', { expiresIn: '1h' }); // Replace with a strong secret key
+const generateAccessToken = (investor) => {
+    return jwt.sign({ id: investor.id, investor_uid: investor.investor_uid }, 'mutual_fund_jwt_secret_key', { expiresIn: '1h' }); // Replace with a strong secret key
 };
   
  
 const Login = async (req, res) => {
     try{
-        const {login_type, username, password} = req.body;
-        if(!login_type || !username || !password) {
+        const {login_type, investor_uid, password} = req.body;
+        if(!login_type || !investor_uid || !password) {
             return res.status(400).json({
                 message : "All fields are required",
             });
@@ -26,16 +26,16 @@ const Login = async (req, res) => {
                 message : "Please provide right login type!",
             });
         }
-        const user = await  UserSchema.findOne({ username, login_type }); 
-        if (!user) {
+        const investor = await  InvestorSchema.findOne({ investor_uid, login_type }); 
+        if (!investor) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, investor.password);
         if (!isMatch) {
-          return res.status(401).json({ message: 'Invalid username or password' });
+          return res.status(401).json({ message: 'Invalid investor_uid or password' });
         }
-        const accessToken = generateAccessToken(user);
-        res.status(200).json({ token: accessToken, message: 'Login successful' , user: { id: user.id, username: user.username } });
+        const accessToken = generateAccessToken(investor);
+        res.status(200).json({ token: accessToken, message: 'Login successful' , investor: { id: investor.id, investor_uid: investor.investor_uid } });
     }catch(err) {
         console.log('Error -------   '+err);
         res.status(400).json({
@@ -99,15 +99,21 @@ const VerifyCode = (req, res) => {
 
 const BecomeMember = async (req, res) => {
     try{
-        const {username, arnNumber, mobile, city, login_type, password} = req.body;
-        if(!username || !mobile ){
+        const { arnNumber, mobile, city, login_type, password} = req.body;
+        if(!arnNumber || !mobile || !password ||  !login_type){
             return res.status(400).json({
                 "message":"please provide all data",
             });
         }
-        const user = new UserSchema({ username, arnNumber, mobile, city, login_type, password,});
-        const response = await user.save();
-        res.status(201).json(response);
+        const investor = new InvestorSchema({ arnNumber, mobile, city, login_type, password,});
+        const response = await investor.save();
+        const updatedInvestor = await InvestorSchema.findByIdAndUpdate(
+            response._id,
+            { investor_uid: response._id },
+            { new: true }
+        );
+
+        res.status(201).json(updatedInvestor);
         } catch(err){
             console.log('Error -------   '+err);
             if (err.code === 11000) {

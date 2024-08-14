@@ -11,13 +11,13 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  jwt.verify(token, 'mutual_fund_jwt_secret_key', (err, user) => {
+  jwt.verify(token, 'mutual_fund_jwt_secret_key', (err, investor) => {
     if (err) {
       return res.status(403).json({ message: 'Invalid token'});
     }
-    console.log("username -------   "+user.username);
-    if(user.username){
-      req.user = user;
+    console.log("investor_uid -------   "+investor.investor_uid);
+    if(investor.investor_uid){
+      req.investor = investor;
       next();
     }else{
       return res.status(403).json({ message: 'Please provide valid token.' });
