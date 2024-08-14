@@ -7,6 +7,7 @@ const userDetailsSchema = new mongoose.Schema({
     last_name: String,
     pan_number: String,
     applicant_kyc_type: String,
+    mutual_funds:  Array,
     date_of_birth: String,
     gender: String,
     email: String,
@@ -41,7 +42,7 @@ const fatcaSchema = new mongoose.Schema({
 }, { _id: false });
 
 const bankDetailsSchema = new mongoose.Schema({
-    account_number: String,
+    account_number: Number,
     account_type: String,
     ifsc_code: String,
     bank_name : String,
@@ -60,14 +61,7 @@ const uploadedDocumentsSchema = new mongoose.Schema({
 }, { _id: false });
 
 const clientSchema = new mongoose.Schema({
-    username: { type: String, ref: 'Users', required: true },
-    arn_number : { type: String, required : true},
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: String, required: true },
-    pan_number: { type: String, required: true },
-    mutual_funds: {type: Array},
-    birth_date: { type: String,},
+    investor_uid: { type: String, ref: 'Users', required: true },
     user_details: userDetailsSchema,
     fatca_detials : fatcaSchema,
     bank_details : bankDetailsSchema,
