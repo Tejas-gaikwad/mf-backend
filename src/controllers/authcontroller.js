@@ -15,8 +15,8 @@ const generateAccessToken = (investor) => {
  
 const Login = async (req, res) => {
     try{
-        const {login_type, investor_uid, password} = req.body;
-        if(!login_type || !investor_uid || !password) {
+        const {login_type, mobile, password} = req.body;
+        if(!login_type || !mobile || !password) {
             return res.status(400).json({
                 message : "All fields are required",
             });
@@ -26,16 +26,17 @@ const Login = async (req, res) => {
                 message : "Please provide right login type!",
             });
         }
-        const investor = await  InvestorSchema.findOne({ investor_uid, login_type }); 
+        const investor = await  InvestorSchema.findOne({ mobile, login_type }); 
         if (!investor) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
         const isMatch = await bcrypt.compare(password, investor.password);
         if (!isMatch) {
-          return res.status(401).json({ message: 'Invalid investor_uid or password' });
+          return res.status(401).json({ message: 'Invalid Mobile or password' });
         }
         const accessToken = generateAccessToken(investor);
-        res.status(200).json({ token: accessToken, message: 'Login successful' , investor: { id: investor.id, investor_uid: investor.investor_uid } });
+        console.log("investor.id   ---    "+investor.id);
+        res.status(200).json({ token: accessToken, message: 'Login successful' , investor: {  investor_uid: investor.id } });
     }catch(err) {
         console.log('Error -------   '+err);
         res.status(400).json({
@@ -114,14 +115,14 @@ const BecomeMember = async (req, res) => {
         );
 
         res.status(201).json(updatedInvestor);
-        } catch(err){
+    } catch(err){
             console.log('Error -------   '+err);
-            if (err.code === 11000) {
-                res.status(400).json({ message: 'Please enter unique values.' });
-              } else {
-                res.status(400).json({ message: 'Error, Something went wrong.' });
-              }
+        if (err.code === 11000) {
+            res.status(400).json({ message: 'Please enter unique values.' });
+        } else {
+            res.status(400).json({ message: 'Error, Something went wrong.' });
         }
+    }
 }
 
 module.exports = { Login, SendVerificationCode, BecomeMember, VerifyCode };

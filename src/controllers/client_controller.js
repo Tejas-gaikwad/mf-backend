@@ -7,39 +7,26 @@ const mutualFund = require('../models/mutual_fund');
 const AddClient = async (req, res) => {
     try{
         const investor_uid = req.investor.investor_uid;
-        console.log("investor_uid is ------  "+investor_uid);
-
-        const {  name, email, phone, pan_number, date_of_birth, arn_number, bank_details, fatca_detials , client_desk_settings, upload_documents } = req.body;
-
-        if (!name || !email || !phone) {
-            return res.status(400).json({ message: 'Name, email, and phone are required' });
+        const {  arn_number, user_details, bank_details, fatca_detials , client_desk_settings, upload_documents } = req.body;
+        if ( !arn_number || !user_details || !bank_details || !fatca_detials || !client_desk_settings || !upload_documents ) {
+            return res.status(400).json({ message: 'Please provide all data.' });
         }
-
         const investor = await InvestorSchema.findOne({investor_uid});
-
         if (!investor) {
             return res.status(404).json({ message: 'Investor not found' });
         }
-          
-        const existingClient = await clientSchema.findOne({ phone });
+        const phone = user_details.mobile_number;
+        const existingClient = await clientSchema.findOne({ 'user_details.mobile_number':  phone });
         if (existingClient) {
-        return res.status(400).json({ message: 'Client with this phone number already exists' });
+        return res.status(400).json({ message: 'This phone number is already used by other client.' });
         }
-
-        const client = new clientSchema({ investor_uid, arn_number, name, email, phone, pan_number, date_of_birth, bank_details, fatca_detials, client_desk_settings, upload_documents });
-
+        const client = new clientSchema({ investor_uid, arn_number, user_details, bank_details, fatca_detials, client_desk_settings, upload_documents }); // arn_number,
         const savedClient = await client.save();
-
         if (!investor.clients) {
           investor.clients = [];
-          }
-
-
-          investor.clients.push(savedClient._id);
-
-
+        }
+        investor.clients.push(savedClient._id);
         await investor.save();
-
         res.status(201).json({ message: 'Client added successfully', client: savedClient });
 
     } catch(err){

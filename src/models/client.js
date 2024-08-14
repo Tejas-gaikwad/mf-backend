@@ -57,11 +57,11 @@ const clientDeskSettingsSchema = new mongoose.Schema({
 const uploadedDocumentsSchema = new mongoose.Schema({
     applicant_signature: { type: String, required: true },
     applicant_cancel_cheque: String,
-
 }, { _id: false });
 
 const clientSchema = new mongoose.Schema({
     investor_uid: { type: String, ref: 'Users', required: true },
+    arn_number : { type: String,  required: true },
     user_details: userDetailsSchema,
     fatca_detials : fatcaSchema,
     bank_details : bankDetailsSchema,
