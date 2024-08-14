@@ -8,7 +8,7 @@ const AddClient = async (req, res) => {
     try{
         const investor_uid = req.investor.investor_uid;
         const {  arn_number, user_details, bank_details, fatca_detials , client_desk_settings, upload_documents } = req.body;
-        if ( !arn_number || !user_details || !bank_details || !fatca_detials || !client_desk_settings || !upload_documents ) {
+        if ( !arn_number || !user_details.mobile_number || !user_details.pan_number || !user_details.date_of_birth || !user_details.email ) {
             return res.status(400).json({ message: 'Please provide all data.' });
         }
         const investor = await InvestorSchema.findOne({investor_uid});
