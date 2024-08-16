@@ -1,13 +1,15 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const authRoutes = require('./routes/authroutes');
 const profileRoutes = require('./routes/profile_routes');
 const clientRoutes = require('./routes/client_routes');
 const researchRoutes = require('./routes/research_routes');
 const session = require('express-session');
-const app = express();
 
+const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 
 // Session middleware
