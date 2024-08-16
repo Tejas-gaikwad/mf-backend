@@ -100,13 +100,21 @@ const VerifyCode = (req, res) => {
 
 const BecomeMember = async (req, res) => {
     try{
-        const { arnNumber, mobile, city, login_type, password} = req.body;
+        const { arnNumber, full_name, mobile, city, login_type, password} = req.body;
         if(!arnNumber || !mobile || !password ||  !login_type){
             return res.status(400).json({
                 "message":"please provide all data",
             });
         }
-        const investor = new InvestorSchema({ arnNumber, mobile, city, login_type, password,});
+
+        const investorData = await InvestorSchema.findOne({mobile});
+
+        if(investorData) {
+           return res.status(400).json({ message: 'Mobile Number is already in use.' });
+        }
+
+        const investor = new InvestorSchema({ arnNumber, full_name, mobile, city, login_type, password,});
+
         const response = await investor.save();
         const updatedInvestor = await InvestorSchema.findByIdAndUpdate(
             response._id,
