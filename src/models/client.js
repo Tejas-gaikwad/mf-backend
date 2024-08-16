@@ -27,7 +27,6 @@ const userDetailsSchema = new mongoose.Schema({
     applicant_pincode: String,
     applicant_state: String,
     applicant_country: String,
-
 }, { _id: false });
 
 

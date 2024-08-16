@@ -16,10 +16,25 @@ const AddClient = async (req, res) => {
             return res.status(404).json({ message: 'Investor not found' });
         }
         const phone = user_details.mobile_number;
-        const existingClient = await clientSchema.findOne({ 'user_details.mobile_number':  phone });
-        if (existingClient) {
-        return res.status(400).json({ message: 'This phone number is already used by other client.' });
+        const phoneExist = await clientSchema.findOne({ 'user_details.mobile_number': phone });
+        if (phoneExist) {
+          return res.status(400).json({ message: 'This phone number is already used by other client.' });
+          }
+
+        const emailId = user_details.email;
+        const emailExist = await clientSchema.findOne({ 'user_details.email': emailId });
+        if (emailExist) {
+          return res.status(400).json({ message: 'This Email Id already used by other client.' });
+          }
+
+        const panCard = user_details.pan_number;
+        const panExist = await clientSchema.findOne( { 'user_details.pan_number': panCard });
+
+        if (panExist) {
+          return res.status(400).json({ message: 'This Pan Card is already used by other client.' });
         }
+
+        
         const client = new clientSchema({ investor_uid, arn_number, user_details, bank_details, fatca_detials, client_desk_settings, upload_documents }); // arn_number,
         const savedClient = await client.save();
         if (!investor.clients) {
@@ -50,6 +65,30 @@ const ListOfAllClients = async (req, res) => {
       console.error('Error getting clients:', error);
       res.status(500).json({ message: 'Failed to get clients' });
     }
+}
+
+const GetClientInformation = async (req, res) => {
+  try {
+    const investor_uid = req.investor.investor_uid;
+    const clientId = req.params.clientId;
+    const data = await InvestorSchema.findOne({investor_uid});
+    if (!data) {
+      return res.status(404).json({ message: 'InValid Investor.' });
+    }
+    const clientAvailableInInvestorClients = data.clients.includes(clientId);
+    if(clientAvailableInInvestorClients) {
+    const clientData = await clientSchema.findById(clientId);
+    if (!clientData) {
+      return res.status(404).json({ message: 'InValid Client.' });
+    }
+    return  res.status(200).json({ data: clientData });
+    } else {
+      return res.status(404).json({ message: 'Client id not available.' });
+    }
+  } catch (error) {
+    console.error('Error getting clients:', error);
+    res.status(500).json({ message: 'Something went wrong.' });
+  }
 }
 
 // const FatcaDetails = async (req, res) => {
@@ -309,10 +348,6 @@ const addClientMutualFundData = async (req, res ) => {
   }
 }
 
-
-
-
-
 const GetClientWealthReport = async (req, res ) => {
   try{
       const investor_uid = req.investor.investor_uid;
@@ -363,4 +398,4 @@ const getMutualFundReportFromDatabase = async ( clientId) => {
 }
 
 
-module.exports ={ AddClient, ListOfAllClients,   GetClientMFReport, GetClientWealthReport}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
+module.exports ={ AddClient, ListOfAllClients,   GetClientMFReport, GetClientWealthReport, GetClientInformation}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,

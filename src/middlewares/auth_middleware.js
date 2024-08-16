@@ -15,7 +15,6 @@ const authenticateToken = (req, res, next) => {
     if (err) {
       return res.status(403).json({ message: 'Invalid token'});
     }
-    console.log("investor_uid -------   "+investor.investor_uid);
     if(investor.investor_uid){
       req.investor = investor;
       next();

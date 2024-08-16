@@ -1,4 +1,4 @@
-const{ AddClient, ListOfAllClients, GetClientMFReport, GetClientWealthReport  } = require('../controllers/client_controller'); //  FatcaDetails, AddUserDetails, AddBankDetails, ClientDeskSettings,
+const{ AddClient, ListOfAllClients, GetClientMFReport, GetClientWealthReport, GetClientInformation  } = require('../controllers/client_controller'); //  FatcaDetails, AddUserDetails, AddBankDetails, ClientDeskSettings,
 const{ authenticateToken,  } = require('../middlewares/auth_middleware');
 const express = require('express');
 const router = express.Router();
@@ -17,6 +17,7 @@ router.get('/getAllClients/', authenticateToken, ListOfAllClients);
 // router.get('/:clientId/fatcadetails', authenticateToken, FatcaDetails);
 // router.get('/:clientId/addClientDeskSettings', authenticateToken, ClientDeskSettings);
 router.post('/:clientId/sendClientLoginCredentials', authenticateToken,);
+router.get('/:clientId/getClientData', authenticateToken, GetClientInformation,);
 router.post('/getClientMFReport', authenticateToken, GetClientMFReport);
 router.post('/getClientWealthReport', authenticateToken, GetClientWealthReport);
 
