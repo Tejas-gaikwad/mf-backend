@@ -2,7 +2,7 @@ const { router } = require('../app');
 const clientSchema = require('../models/client');
 const InvestorSchema = require('../models/investor');
 const mongoose = require('mongoose');
-const mutualFund = require('../models/mutual_fund');
+const MutualFundMember = require('../models/mutual_fund');
 
 const AddClient = async (req, res) => {
     try{
@@ -75,7 +75,9 @@ const GetClientInformation = async (req, res) => {
     if (!data) {
       return res.status(404).json({ message: 'InValid Investor.' });
     }
+    console.log("data.clients  ---   " +data.clients);
     const clientAvailableInInvestorClients = data.clients.includes(clientId);
+    console.log("clientAvailableInInvestorClients  ---   " +clientAvailableInInvestorClients);
     if(clientAvailableInInvestorClients) {
     const clientData = await clientSchema.findById(clientId);
     if (!clientData) {
@@ -83,7 +85,7 @@ const GetClientInformation = async (req, res) => {
     }
     return  res.status(200).json({ data: clientData });
     } else {
-      return res.status(404).json({ message: 'Client id not available.' });
+      return res.status(404).json({ message: 'Client is not available.' });
     }
   } catch (error) {
     console.error('Error getting clients:', error);
@@ -91,155 +93,6 @@ const GetClientInformation = async (req, res) => {
   }
 }
 
-// const FatcaDetails = async (req, res) => {
-//   try{
-//       // const { bith_place, birth_country, wealth_source, politically_exposed_person, address_type, residence_country, income_slab } = req.body;
-//       const newFatcaDetails = req.body;
-//       const { clientId } = req.params;
-
-//       if (!newFatcaDetails) {
-//           return res.status(400).json({ message: 'Please provide all details' });
-//       }
-
-//       const client = await clientSchema.findByIdAndUpdate( clientId );
-//       if (!client) {
-//         return res.status(400).json({ message: 'Client not found.'});
-//       }
-
-//       if (!client.fatca_detials) {
-//         client.fatca_detials = newFatcaDetails;
-//         await client.save();
-//         return res.status(400).json({ message: 'Fatca details added successfully', client: client });
-//       }
-
-//       client.fatca_detials = {
-//         ...client.fatca_detials.toObject(),  
-//         ...newFatcaDetails,  
-//       };
-
-//       await client.save();
-
-//       return res.status(201).json({ message: 'Fatca details added successfully', client: client });
-
-//   } catch(err){
-//       console.log("err --   ", err);
-//       res.status(400).json({
-//           "message" : "Error, Something went wrong."
-//       });
-//   }
-// }
-
-// const AddClientUserDetails = async (req, res) => {
-//   try{
-//     const newClientUserDetails = req.body;
-//     const { clientId } = req.params;
-
-//     if (!newClientUserDetails) {
-//         return res.status(400).json({ message: 'Please provide all details' });
-//     }
-
-//     const client = await clientSchema.findByIdAndUpdate( clientId );
-//     if (!client) {
-//       return res.status(400).json({ message: 'Client not found.'});
-//     }
-
-//     if (!client.user_details) {
-//       client.user_details = newClientUserDetails;
-//       await client.save();
-//       return res.status(400).json({ message: 'User details added successfully', client: client });
-//     }
-
-//     client.user_details = {
-//       ...client.user_details.toObject(),  
-//       ...newClientUserDetails,  
-//     };
-
-//     await client.save();
-
-//     return res.status(201).json({ message: 'User details updated successfully', client: client });
-
-//   } catch(err) {
-//       console.log("err --   ", err);
-//       res.status(400).json({
-//           "message" : "Error, Something went wrong."
-//       });
-//   }
-// }
-
-// const AddBankDetails = async (req, res) => {
-//   try{
-    
-//     const newBankDetails = req.body;
-//     const { clientId } = req.params;
-
-//     if (!newBankDetails) {
-//         return res.status(400).json({ message: 'Please provide all details' });
-//     }
-
-//     const client = await clientSchema.findByIdAndUpdate( clientId );
-//     if (!client) {
-//       return res.status(400).json({ message: 'Client not found.'});
-//     }
-
-//     if (!client.bank_details) {
-//       client.bank_details = newBankDetails;
-//       await client.save();
-//       return res.status(400).json({ message: 'Bank details added successfully', client: client });
-//     }
-
-//     client.bank_details = {
-//       ...client.bank_details.toObject(),  
-//       ...newBankDetails,  
-//     };
-
-//     await client.save();
-
-//     return res.status(201).json({ message: 'Bank details updated successfully', client: client });
-
-
-//   } catch(err){
-//       console.log("err --   ", err);
-//       res.status(400).json({
-//           "message" : "Error, Something went wrong."
-//       });
-//   }
-// }
-
-// const ClientDeskSettings = async (req, res) => {
-//   try{
-//       const clientDeskSettings = req.body;
-//       const { clientId } = req.params;
-
-//       if (!clientDeskSettings) {
-//           return res.status(400).json({ message: 'Please provide all details' });
-//       }
-
-//       const client = await clientSchema.findById( clientId );
-
-//       if (!client) {
-//         return res.status(400).json({ message: 'Client not found.'});
-//       }
-
-//       client.client_desk_settings = clientDeskSettings;
-//       await client.save();
-
-//       res.status(201).json({ message: 'Client Desk Settings updated successfully', client: client });
-
-//   } catch(err){
-//       console.log("err --   ", err);
-//       res.status(400).json({
-//           "message" : "Error, Something went wrong."
-//       });
-//   }
-// }
-
-// const submitBSERegistration = async (req, res) => {
-//   // TODO add logic here to make submission 
-// }
-
-// const sendClientLoginCredentials = async (req, res) => {
-//   // TODO add logic here to make submission 
-// }
 
 const GetClientMFReport = async (req, res ) => {
   try{
@@ -291,62 +144,6 @@ const GetClientMFReport = async (req, res ) => {
   }
 }
 
-const addClientMutualFundData = async (req, res ) => {
-  try{
-      
-      
-          const clientId = req.body.clientId;
-          const clientData = await clientSchema.findById(clientId);
-      
-          if (!clientData) {
-            return res.status(400).json({ error: 'Not valid Client.' });
-          } else {
-            if (!clientData.mutual_funds) {
-
-
-              return res.status(400).json({ error: 'No Mutual Fund data Found.' });
-
-            } else {
-              const mutualFundsList = clientData.mutual_funds;
-
-              if (!Array.isArray(mutualFundsList) || mutualFundsList.some(id => !mongoose.Types.ObjectId.isValid(id))) {
-                return res.status(400).json({ error: 'Invalid ID format' });
-              }
-             
-
-              const objectIds = mutualFundsList.map(id => new  mongoose.Types.ObjectId(id));
-
-
-              const mutualFunds =  await mutualFund.find({
-                _id: { $in: objectIds }
-              }).exec();
-
-
-              const results = mutualFunds.map(fund => ({
-                _id: fund._id,
-                investment_cost: fund.investment_cost.toString(),
-                current_cost: fund.current_cost.toString(),
-                absolute_return: fund.absolute_return,
-                XIRR: fund.XIRR.toString(),
-                today_PnL: fund.today_PnL.toString(),
-                total_PnL: fund.total_PnL.toString()
-              }));
-
-    
-              return res.status(201).json({
-                  "mutualFund" : results,
-                });
-            }
-          }
-       
-
-      
-  }catch(err){
-       res.status(400).json({
-          "message" : "Error, Something went wrong."
-      });
-  }
-}
 
 const GetClientWealthReport = async (req, res ) => {
   try{
@@ -393,9 +190,138 @@ const GetClientWealthReport = async (req, res ) => {
   }
 }
 
-const getMutualFundReportFromDatabase = async ( clientId) => {
+const GetClientMutualFundReport =  async (req, res ) => {
+  try {
 
+    const clientId = req.params.clientId;
+    const clientData = await clientSchema.findById(clientId);
+    if (!clientData) {
+      return res.status(404).json({ message: 'InValid Client.' });
+    }
+    const mutualFundIds = clientData.user_details.mutual_funds;
+    const idsArray = Array.isArray(mutualFundIds) ? mutualFundIds : [mutualFundIds];
+    const mutualFunds = await MutualFundMember.find({
+      _id: { $in: idsArray }
+    });
+    return  res.status(200).json({
+      message: "Mutual funds retrieved successfully!",
+      data: mutualFunds
+    });
+  } catch (error) {
+    console.log("error --   "+ error);
+    res.status(500).json({ 
+      status : false,
+      message: "Error Getting mutual fund report",
+      error: error.message 
+    });
+  }
 }
 
+const AddClientMutualFundReport = async (req, res) => {
 
-module.exports ={ AddClient, ListOfAllClients,   GetClientMFReport, GetClientWealthReport, GetClientInformation}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
+    try {
+      const {  investment_since_date, investment_cost, current_value, XIRR, abs_return, today_PnL, total_PnL, investment_list } = req.body;
+      const clientId = req.params.clientId;
+      const newMutualFundMember = new MutualFundMember({
+        investment_since_date,
+        investment_cost,
+        current_value,
+        XIRR,
+        abs_return,
+        today_PnL,
+        total_PnL,
+        investment_list
+      });
+      const savedReport = await newMutualFundMember.save();
+      const clientData = await clientSchema.findById(clientId);
+      if (!clientData) {
+        return res.status(404).json({ message: 'InValid Client.' });
+      }
+      const mutualFundList = clientData.user_details.mutual_funds;
+      mutualFundList.push(savedReport._id);
+      clientData.user_details.mutual_funds = mutualFundList;
+
+      console.log("clientData  ----    "+ clientData);
+
+      await clientData.save();
+  
+      return res.status(201).json({
+        message: "Mutual fund report added successfully!",
+        data: savedReport
+      });
+  
+    } catch (error) {
+      console.log("error --   "+ error);
+      res.status(500).json({ 
+        message: "Error adding mutual fund report",
+        error: error.message 
+      });
+    }
+  }
+  
+  
+
+
+module.exports ={ AddClient, ListOfAllClients,   GetClientMFReport, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport, GetClientMutualFundReport}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
+
+
+
+
+
+
+// const addClientMutualFundData = async (req, res ) => {
+//   try{
+      
+      
+//           const clientId = req.body.clientId;
+//           const clientData = await clientSchema.findById(clientId);
+      
+//           if (!clientData) {
+//             return res.status(400).json({ error: 'Not valid Client.' });
+//           } else {
+//             if (!clientData.mutual_funds) {
+
+
+//               return res.status(400).json({ error: 'No Mutual Fund data Found.' });
+
+//             } else {
+//               const mutualFundsList = clientData.mutual_funds;
+
+//               if (!Array.isArray(mutualFundsList) || mutualFundsList.some(id => !mongoose.Types.ObjectId.isValid(id))) {
+//                 return res.status(400).json({ error: 'Invalid ID format' });
+//               }
+             
+
+//               const objectIds = mutualFundsList.map(id => new  mongoose.Types.ObjectId(id));
+
+
+//               const mutualFunds =  await mutualFund.find({
+//                 _id: { $in: objectIds }
+//               }).exec();
+
+
+//               const results = mutualFunds.map(fund => ({
+//                 _id: fund._id,
+//                 investment_cost: fund.investment_cost.toString(),
+//                 current_cost: fund.current_cost.toString(),
+//                 absolute_return: fund.absolute_return,
+//                 XIRR: fund.XIRR.toString(),
+//                 today_PnL: fund.today_PnL.toString(),
+//                 total_PnL: fund.total_PnL.toString()
+//               }));
+
+    
+//               return res.status(201).json({
+//                   "mutualFund" : results,
+//                 });
+//             }
+//           }
+       
+
+      
+//   }catch(err){
+//        res.status(400).json({
+//           "message" : "Error, Something went wrong."
+//       });
+//   }
+// }
