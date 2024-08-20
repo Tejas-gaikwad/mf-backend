@@ -218,7 +218,6 @@ const GetClientMutualFundReport =  async (req, res ) => {
 }
 
 const AddClientMutualFundReport = async (req, res) => {
-
     try {
       const {  investment_since_date, investment_cost, current_value, XIRR, abs_return, today_PnL, total_PnL, investment_list } = req.body;
       const clientId = req.params.clientId;
@@ -240,8 +239,6 @@ const AddClientMutualFundReport = async (req, res) => {
       const mutualFundList = clientData.user_details.mutual_funds;
       mutualFundList.push(savedReport._id);
       clientData.user_details.mutual_funds = mutualFundList;
-
-      console.log("clientData  ----    "+ clientData);
 
       await clientData.save();
   
