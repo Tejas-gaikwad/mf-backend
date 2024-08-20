@@ -68,9 +68,11 @@ const updateClientData = async (req, res) => {
       if (!clientData) {
           return res.status(404).json({  "status" : false, message: 'Client not found' });
       }
+
       if(clientData.user_details.pan_number !== updateData.user_details.pan_number) {
         return res.status(400).json({ "status" : false, message: 'Cannot change Pan card number.' });
       }
+
       if(clientData.user_details.email !== updateData.user_details.email) {
         return res.status(400).json({ "status" : false, message: 'Cannot change Email.' });
       }
@@ -194,75 +196,86 @@ const GetClientMFReport = async (req, res ) => {
 
 const GetClientWealthReport = async (req, res ) => {
   try{
-      const investor_uid = req.investor.investor_uid;
-
-
-      if(investor_uid){
-
-        const clientId = req.body.clientId;
-        const report_type = req.body.reportType;
-
-        
-        if(report_type == "wealth") {
-          const clientData = await clientSchema.findById(clientId);
-          
-          if (!clientData) {
-            return res.status(400).json({ error: 'Not valid Client.' });
-          } else {
-            if (!clientData.wealth_report) {
-              return res.status(400).json({ error: 'No Mutual Fund data Found.' });
-            } else {
-              const wealthReport = clientData.wealth_report;
-              if (!Array.isArray(mutualFundsList) || mutualFundsList.some(id => !mongoose.Types.ObjectId.isValid(id))) {
-                return res.status(400).json({ error: 'Invalid ID format' });
-              }
-              const objectIds = mutualFundsList.map(id => new  mongoose.Types.ObjectId(id));
-              return res.status(201).json({
-                  "mutualFund" : results,
-                });
-            }
-          }
+        const clientId = req.params.clientId;
+        if(!clientId) {
+          return res.status(400).json({ "status" : false,  error: 'Invalid Client Id.' });
         }
+          const clientData = await clientSchema.findById(clientId);
+          console.log("clientData   ----    "+ clientData);  
+          if (!clientData) {
+            return res.status(400).json({ "status" : false, error: 'Not valid Client.' });
+          } else {
+        
+            return res.status(201).json({
+                  "status" : true,
+                  "wealth_report" : {
+                    "investment_portfolio_total" : {
+                    "total_investment": "86,85,26,887",
+                    "current_value" :  "4,86,85,26,887",
+                    "mutual_fund" : {
+                      "investment" : "2,42,70,255",
+                      "current_value" : "4,54,12,143",
+                    },
+                    "equity" : {
+                      "investment" : "1,62,80,119",
+                      "current_value" : "2,88,77,284",
+                    },
+                    "post_office" : {
+                      "investment" : "6,00,000",
+                      "current_value" : "7,22,029",
+                    },
+                    "fd_bonds" : {
+                      "investment" : "12,00,000",
+                      "current_value" : "32,22,029",
+                    },
+                    "commodity" : {
+                      "investment" : "5,54,00,000",
+                      "current_value" : "72,22,029",
+                    },
+                    "real_estate" : {
+                      "investment" : "60,54,00,000",
+                      "current_value" : "1,97,83,03,851",
+                    },
+                    "pms_alt_investment" : {
+                      "investment" : "4,54,85,143",
+                      "current_value" : "71,76,71,900",
+                    },
+                    },
+                    "insurance_portfolio_total" : {
+                      "premium_per_year" : "564067",
+                      "risk_cover" : "49400000",
+                      "life_insurance" : {
+                        "premium_per_year" : "530000",
+                        "risk_cover" : "39000000",
+                      },
+                      "mediclaim" : {
+                        "premium_per_year" : "31567",
+                        "risk_cover" : "10300000",
+                      },
+                      "accidental" : {
+                        "premium_per_year" : "0",
+                        "risk_cover" : "0",
+                      },
+                      "vehicle" : {
+                        "premium_per_year" : "0",
+                        "risk_cover" : "0",
+                      },
+                      "others" : {
+                        "premium_per_year" : "2600",
+                        "risk_cover" : "100000",
+                      },
+                    }
 
-      } else{
-          res.status(400).json({
-              "message" : "Invalid Authentication."
-          }); 
-      }
+
+                    
+                  }
+            });
+            
+          }
   }catch(err){
-      console.log("error" + err);
        res.status(400).json({
           "message" : "Error, Something went wrong."
       });
-  }
-}
-
-
-
-const GetClientMutualFundReport =  async (req, res ) => {
-  try {
-
-    const clientId = req.params.clientId;
-    const clientData = await clientSchema.findById(clientId);
-    if (!clientData) {
-      return res.status(404).json({ message: 'InValid Client.' });
-    }
-    const mutualFundIds = clientData.user_details.mutual_funds;
-    const idsArray = Array.isArray(mutualFundIds) ? mutualFundIds : [mutualFundIds];
-    const mutualFunds = await MutualFundMember.find({
-      _id: { $in: idsArray }
-    });
-    return  res.status(200).json({
-      message: "Mutual funds retrieved successfully!",
-      data: mutualFunds
-    });
-  } catch (error) {
-    console.log("error --   "+ error);
-    res.status(500).json({ 
-      status : false,
-      message: "Error Getting mutual fund report",
-      error: error.message 
-    });
   }
 }
 
@@ -308,10 +321,57 @@ const AddClientMutualFundReport = async (req, res) => {
 }
   
 
+const GoalTracking = async (req, res) => {
+    const clientId = req.params.clientId;
+    if(!clientId) {
+      return res.status(400).json({ "status" : false,  error: 'Invalid Client Id.' });
+    }
+    const clientData = await clientSchema.findById(clientId);
+    if (!clientData) {
+      return res.status(400).json({ "status" : false, error: 'Not valid Client.' });
+    } else {
+        return res.status(201).json({
+              "status" : true,
+              "goal_tracking" : {
+                "goal_type" : "retirement",
+                "goal_for" :` ${clientData.user_details.first_name} ${clientData.user_details.last_name}`,
+                "created_on" : "20 Aug 2024",
+                "goal_year": "2038",
+                "current_age" : "24",
+                "goal_duration" : "168",
+                "goal_target" : "8,89,57,412",
+                "achieved" : "8,46,546",
+                "achievability" : "9.42%",
+                "shortfall" : "8,05,79,107",
+                "shortfall_recurring"  : "1,23,029",
+                "shortfall_one_time" : "81,70,587",
+                "total_investment_mapped" : {
+                  "recurring" : "0",
+                  "one_time" : "8,49,546",
+                  "view_mapped_investment" : [
+                    {
+                        "type" : "mutual_fund",
+                        "name" : "HDFC Liq - Reg (G)",
+                        "NAV" : "4827.4955",
+                        "allocation" : "25%",
+                        "folio_no" : "10569084/11",
+                        "investment_mode" : "Lumpsum",
+                        "mapped_monthly" : "0",
+                        "mapped_lumpsum" : "8,49,546"  
+                    }
+                  ],
+                },
+                "total_investment_planned" : {
+                  "recurring" : "0",
+                  "one_time" : "8,49,546",
+                }
+              }
+        });
+    }
+}
+
   
-
-
-module.exports ={ AddClient, ListOfAllClients, updateClientData,  GetClientMFReport, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport, GetClientMutualFundReport}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
+module.exports ={ AddClient, ListOfAllClients, updateClientData,  GetClientMFReport, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport, GoalTracking}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
 
 
 // const FatcaDetails = async (req, res) => {
