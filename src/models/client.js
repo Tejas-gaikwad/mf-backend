@@ -34,7 +34,7 @@ const fatcaSchema = new mongoose.Schema({
     bith_place: String,
     birth_country: String,
     wealth_source: String,
-    politically_exposed_person: Boolean,
+    politically_exposed_person:String,
     address_type: String,
     residence_country: String,
     income_slab: String,
