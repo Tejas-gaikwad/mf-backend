@@ -12,6 +12,36 @@ const generateAccessToken = (investor) => {
     return jwt.sign({ id: investor.id, investor_uid: investor.investor_uid }, 'mutual_fund_jwt_secret_key', { expiresIn: '1h' }); // Replace with a strong secret key
 };
   
+const ChangePassword = async (req, res) => {
+    const investor_uid = req.investor.investor_uid;
+    const investor = await  InvestorSchema.findOne({investor_uid});
+
+    if (!investor) {
+      return res.status(404).json({ "status" : false, message: 'Investor not found' });
+    }
+
+    const { oldPassword, newPassword } = req.body;
+    const isMatch = await bcrypt.compare(oldPassword, investor.password);
+    console.log("isMatch  ---   "+ isMatch);
+
+    if (!isMatch) {
+        return res.status(400).json({ message: 'Old password is incorrect' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await InvestorSchema.updateOne(
+        { investor_uid },
+        { $set: { password: hashedPassword } }
+    );
+
+    return res.status(200).json({ 
+        "status" : true,
+        message: 'Password updated successfully',
+        "investor_uid" : investor_uid,
+    });
+  }
  
 const Login = async (req, res) => {
     try{
@@ -36,10 +66,16 @@ const Login = async (req, res) => {
         }
         const accessToken = generateAccessToken(investor);
         console.log("investor.id   ---    "+investor.id);
-        res.status(200).json({ token: accessToken, message: 'Login successful' , investor: {  investor_uid: investor.id } });
+        return res.status(200).json({ 
+            "status" : true,
+            token: accessToken, 
+            message: 'Login successful' , 
+            investor: {  investor_uid: investor.id },
+        });
     }catch(err) {
         console.log('Error -------   '+err);
         res.status(400).json({
+            "status" : false,
             "message" : "Error, Something went wrong."
         });
     }
@@ -54,7 +90,6 @@ const SendVerificationCode = (req, res) => {
         });
     }
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    req.session.verificationCode = verificationCode;
     console.log("verificationCode ----   "+verificationCode);
     
     // client.messages.create({
@@ -69,11 +104,13 @@ const SendVerificationCode = (req, res) => {
     
     // TODO add twilio client here.
     res.status(200).json({
+        "status" : true,
         "message" : "Verification code sent successfully."
     });
     } catch(err) {
         console.log('Error -------   '+err);
         res.status(400).json({
+            "status" : false,
             "message" : "Error, Something went wrong."
         });
     }
@@ -116,6 +153,7 @@ const BecomeMember = async (req, res) => {
         const investor = new InvestorSchema({ arnNumber, full_name, mobile, city, login_type, password,});
 
         const response = await investor.save();
+
         const updatedInvestor = await InvestorSchema.findByIdAndUpdate(
             response._id,
             { investor_uid: response._id },
@@ -133,4 +171,4 @@ const BecomeMember = async (req, res) => {
     }
 }
 
-module.exports = { Login, SendVerificationCode, BecomeMember, VerifyCode };
+module.exports = { Login, SendVerificationCode, BecomeMember, VerifyCode, ChangePassword };

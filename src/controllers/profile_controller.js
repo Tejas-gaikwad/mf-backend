@@ -14,6 +14,7 @@ const GetInvestorProfile = async (req, res, next) => {
     }catch(err) {
       console.log("error" + err);
         res.status(400).json({
+          "status" : false,
             "message" : "Error, Something went wrong."
         });
     }
@@ -33,6 +34,7 @@ const GetNotifications = async (req, res, next) => {
 
       // Return the notifications
       return res.status(200).json({
+        "status" : true,
           message: 'Notifications retrieved successfully',
           notifications: investor.notifications,
       });
@@ -41,6 +43,7 @@ const GetNotifications = async (req, res, next) => {
   }catch(err) {
     console.log("error" + err);
       res.status(400).json({
+        "status" : false,
           "message" : "Error, Something went wrong."
       });
   }
@@ -85,6 +88,8 @@ const SendNotification = async (req, res, next) => {
       });
   }
 };
+
+
 
 const WhatsNew = async (req, res) => {
   try{
