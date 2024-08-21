@@ -25,6 +25,4 @@ router.get('/:clientId/track_goal', authenticateToken, GoalTracking);
 
 
 
-
-
 module.exports = router;

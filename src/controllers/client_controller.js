@@ -151,7 +151,6 @@ const GetClientMFReport = async (req, res ) => {
           if (!clientData) {
             return res.status(400).json({ error: 'Not valid Client.' });
           } else {
-            console.log("clientData.user_details.mutual_funds   ----    "+ clientData.user_details.mutual_funds);
             if (!clientData.user_details.mutual_funds) {
               return res.status(400).json({ error: 'No Mutual Fund data Found.' });
 
@@ -299,7 +298,6 @@ const AddClientMutualFundReport = async (req, res) => {
         return res.status(404).json({ message: 'InValid Client.' });
       }
 
-      console.log("clientData.user_details.mutual_funds  ----    "+ clientData.user_details);
       const mutualFundList = clientData.user_details.mutual_funds;
       mutualFundList.push(savedReport._id);
       clientData.user_details.mutual_funds = mutualFundList;

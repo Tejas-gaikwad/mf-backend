@@ -58,10 +58,7 @@ const SendNotification = async (req, res, next) => {
       }
 
       console.log("investor _id ---------    "+investor._id);
-
-
       const newNotification = new Notifications({
-        
         notification_heading,
         notification_content,
         notification_date: new Date(notification_date), // Ensure date is in Date format
@@ -89,4 +86,42 @@ const SendNotification = async (req, res, next) => {
   }
 };
 
-module.exports = {GetInvestorProfile, GetNotifications, SendNotification };
+const WhatsNew = async (req, res) => {
+  try{
+    const investor_uid = req.investor.investor_uid;
+    const investor = await  InvestorSchema.findOne({investor_uid});  
+    if (!investor) {
+      return res.status(404).json({ "status" : false, message: 'Investor not found' });
+    }
+    return res.status(200).json({
+      "status" : true,
+      "data" : [
+        {
+          "heading" : "We are excited to announce MFU (MF Utility) on our platform.",
+          "description" : ["Now you can perform investment of client from MFU directly from AdvisorX App."]
+        },
+        {
+          "heading" : "Send Login Credentials to Client.",
+          "description" : ["Now ARN/Subbroker can send login credentials on client's email.", "You can search and select multiple clients and send details on mall."],
+        },
+        {
+          "heading" : "Wealth Multi-Asset Report.",
+          "description" : ["We have added Multi-Asset Detail Report in Wealth Reports."]
+        },
+        {
+          "heading" : "Advisor and Sub-Broker Login in AdvisorX App.",
+          "description" : ["Now Advisor can provide login to their Subbroker from AdvisorX App."]
+        },
+      ]
+  });
+
+  }catch(err) {
+    console.log("error" + err);
+      res.status(400).json({
+          "status" : false,
+          "data" : "Error, Something went wrong."
+      });
+  }
+}
+
+module.exports = {GetInvestorProfile, GetNotifications, SendNotification, WhatsNew };
