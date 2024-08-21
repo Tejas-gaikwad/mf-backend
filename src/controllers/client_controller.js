@@ -282,6 +282,7 @@ const AddClientMutualFundReport = async (req, res) => {
     try {
       const {  investment_since_date, investment_cost, current_value, XIRR, abs_return, today_PnL, total_PnL, investment_list } = req.body;
       const clientId = req.params.clientId;
+
       const newMutualFundMember = new MutualFundMember({
         investment_since_date,
         investment_cost,
@@ -292,23 +293,20 @@ const AddClientMutualFundReport = async (req, res) => {
         total_PnL,
         investment_list
       });
+      
       const savedReport = await newMutualFundMember.save();
       const clientData = await clientSchema.findById(clientId);
       if (!clientData) {
         return res.status(404).json({ message: 'InValid Client.' });
       }
-
       const mutualFundList = clientData.user_details.mutual_funds;
       mutualFundList.push(savedReport._id);
       clientData.user_details.mutual_funds = mutualFundList;
-
       await clientData.save();
-  
       return res.status(201).json({
         message: "Mutual fund report added successfully!",
         data: savedReport
       });
-  
     } catch (error) {
       console.log("error --   "+ error);
       res.status(500).json({ 
@@ -318,6 +316,48 @@ const AddClientMutualFundReport = async (req, res) => {
     }
 }
   
+const GetOpportunities = async (req, res) => {
+  try{
+    const investor_uid = req.investor.investor_uid;
+    const investor = await InvestorSchema.findOne({investor_uid});
+    if (!investor) {
+        return res.status(404).json({ message: 'Investor not found' });
+    }
+    if (investor.clients.length > 0) {
+      const firstClientId = investor.clients[0];
+      const client = await clientSchema.findById(firstClientId);
+      
+      if (!client) {
+          return res.status(404).json({ "status" : false, message: 'Client not found' });
+      }
+      return res.status(201).json({
+        "status" : true,
+        "data" : [
+          {
+            "client_name" : (client.user_details.first_name ? client.user_details.first_name : "") + " " + (client.user_details.last_name ? client.user_details.last_name : ""),
+            "client_pan_number" : client.user_details.pan_number,
+            "client_goal" : "House Planning - House",
+            "bank_name" : "Kotak",
+            "date" : "01 Feb 2025",
+            "duration" : "One Time",
+            "amount" : "6,00,000",
+          }
+        ]
+      })
+    } else {
+        return res.status(404).json({ message: 'No clients found for this investor' });
+    }
+   
+} catch (error) {
+  console.log("error --   "+ error);
+  return res.status(500).json({ 
+    "status" : false,
+    message: "Error, Something went wrong",
+    error: error.message 
+  });
+}
+}
+
 
 const GoalTracking = async (req, res) => {
     const clientId = req.params.clientId;
@@ -368,8 +408,10 @@ const GoalTracking = async (req, res) => {
     }
 }
 
+
+
   
-module.exports ={ AddClient, ListOfAllClients, updateClientData,  GetClientMFReport, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport, GoalTracking}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
+module.exports ={ AddClient, ListOfAllClients, updateClientData,  GetClientMFReport, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport, GoalTracking, GetOpportunities}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
 
 
 // const FatcaDetails = async (req, res) => {
