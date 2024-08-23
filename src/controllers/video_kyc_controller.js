@@ -14,8 +14,7 @@ const updateClientVideoKycData = async (req, res) => {
         }
 
         const { user_details, identity, address, correspondenceAddress, forms, fatca_details, signature, photo, video, } = req.body;
-     
-
+    
         const investorVideoKYCData = new videoKYCSchema({ investor_uid,  user_details, identity, address, correspondenceAddress, forms, fatca_details, signature, signature, photo, video,});
         const savedData = await investorVideoKYCData.save();
         investor.client_video_kyc__data_uid =  savedData._id;
@@ -23,19 +22,26 @@ const updateClientVideoKycData = async (req, res) => {
         if (!updatedInvestor) {
             return res.status(404).json({  "status" : false, message: 'Cannot update data' });
         }
+
         return res.status(201).json({
           "status" : true,
           "message" : "Video KYC done.",
           "data" : savedData
         });
+
     } catch(err){
-        console.log("err --   ", err);
-        res.status(400).json({
-          "status" : false,
-            "message" : "Error, Something went wrong."
-        });
+        if (err.code === 11000) { 
+            return res.status(400).send({
+                message: 'Duplicate key error: This email already exists.',
+                field: err.keyValue 
+            });
+        } else {
+            return res.status(500).send({
+                message: 'An error occurred while adding the investor.',
+                error: err.message
+            });
+        }
     }
-  
   }
 
   module.exports = { updateClientVideoKycData };

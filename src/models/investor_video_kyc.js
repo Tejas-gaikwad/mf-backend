@@ -23,18 +23,14 @@ const addressProofSchema = new mongoose.Schema({
     upload_front_photo : String,
     upload_back_photo : String,
     name: String,
-
     passport_number: String,
     passport_issue_date: String,
     passport_issue_date: String,
     passport_expiry_date: String,
-
     driving_license_number: String,
     driving_license_issue_date: String,
     driving_license_expiry_date: String,
-
     epic_voter_id_number: String,
-
     address: String,
     city: String,
     district: String,
@@ -42,7 +38,6 @@ const addressProofSchema = new mongoose.Schema({
     pincode: String,
     date_of_birth: String,
     correspondance_address_same: String,
-   
 }, { _id: false });
 
 const correspondenceSchema = new mongoose.Schema({
@@ -50,47 +45,36 @@ const correspondenceSchema = new mongoose.Schema({
     upload_front_photo : String,
     upload_back_photo : String,
     name: String,
-
     passport_number: String,
     passport_issue_date: String,
     passport_issue_date: String,
     passport_expiry_date: String,
-
     driving_license_number: String,
     driving_license_issue_date: String,
     driving_license_expiry_date: String,
-
     epic_voter_id_number: String,
-
     address: String,
     city: String,
     district: String,
     state: String,
     pincode: String,
     date_of_birth: String,
-   
 }, { _id: false });
 
 
 
 const forms_schema = new mongoose.Schema({
-
     gender: String,
     martial_status: String,
     nominee_relation_with_you: String,
-
     nominee_name: String,
     nominee_mother_name: String,
-
     citizenship: String,
     email: String,
-
     occupation_type: String,
     mobile_number: String,
-
     communication_address_type: String,
     permanent_address_type: String,
-
     annual_income: String,
     place_of_birth: String,
 })
