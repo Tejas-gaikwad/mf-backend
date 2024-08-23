@@ -141,7 +141,6 @@ const GetClientInformation = async (req, res) => {
 
 const GetClientMFReport = async (req, res ) => {
   try{
-
         const clientId = req.body.clientId;
         const report_type = req.body.reportType;
 

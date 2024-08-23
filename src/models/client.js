@@ -60,6 +60,7 @@ const uploadedDocumentsSchema = new mongoose.Schema({
 
 const clientSchema = new mongoose.Schema({
     investor_uid: { type: String, ref: 'Users', required: true },
+    client_video_kyc__data_uid: { type: String, ref: 'ClientVideoKYC' },
     arn_number : { type: String,  required: true },
     user_details: userDetailsSchema,
     fatca_detials : fatcaSchema,

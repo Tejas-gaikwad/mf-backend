@@ -1,5 +1,6 @@
 const{ AddClient, ListOfAllClients, GetClientMFReport, GoalTracking, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport,  updateClientData, GetOpportunities } = require('../controllers/client_controller'); //  FatcaDetails, AddUserDetails, AddBankDetails, ClientDeskSettings,
 const{ authenticateToken,  } = require('../middlewares/auth_middleware');
+const { updateClientVideoKycData } = require('../controllers/video_kyc_controller');
 const express = require('express');
 const router = express.Router();
 
@@ -7,12 +8,7 @@ const router = express.Router();
 router.post('/add_client', authenticateToken, AddClient);
 router.put('/updateClientDetails/', authenticateToken, );
 router.get('/getClientDetails/', authenticateToken, );
-router.get('/getAllClients/', authenticateToken, ListOfAllClients);
-// router.put('/:clientId/addfatcadetails', authenticateToken, FatcaDetails);
-// router.put('/:clientId/addUserDetails', authenticateToken, AddUserDetails);
-// router.put('/:clientId/addBankDetails', authenticateToken, AddBankDetails);  
-// router.get('/:clientId/fatcadetails', authenticateToken, FatcaDetails);
-// router.get('/:clientId/addClientDeskSettings', authenticateToken, ClientDeskSettings);
+router.get('/getAllClients/', authenticateToken, ListOfAllClients);;
 router.post('/:clientId/sendClientLoginCredentials', authenticateToken,);
 router.get('/:clientId/getClientData', authenticateToken, GetClientInformation,);
 router.post('/getClientMFReport', authenticateToken, GetClientMFReport);
@@ -21,10 +17,7 @@ router.post('/:clientId/addClientMutualFundReport', authenticateToken, AddClient
 router.patch('/:clientId/updateClientData', authenticateToken, updateClientData);
 router.get('/:clientId/track_goal', authenticateToken, GoalTracking);
 router.get('/get_all_opportunities', authenticateToken, GetOpportunities);
-
-
-
-
+router.post('/:clientId/update_client_video_kyc', authenticateToken, updateClientVideoKycData);
 
 
 module.exports = router;
