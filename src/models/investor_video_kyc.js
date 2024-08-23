@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 
 const userDetailsSchema = new mongoose.Schema({
     name_as_per_pan: String,
-    mobile_number:  { type: String, required: true,  unique: true},
-    email:  { type: String, required: true,  unique: true  },
+    mobile_number:  { type: String, required: true,  },
+    email:  { type: String, required: true, },
     city: String,
 }, { _id: false });
 
@@ -113,13 +113,12 @@ const video = new mongoose.Schema({
     video_link : String,
 }, { _id: false });
 
-const clientVideoKycSchema = new mongoose.Schema({
-    // investor_uid: { type: String, ref: 'Users', required: true },
-    arn_number : { type: String,  required: true },
+const investorVideoKycSchema = new mongoose.Schema({
+    investor_uid: { type: String, ref: 'Users', required: true },
     user_details: userDetailsSchema,
     identity: identitySchema,
     address: addressProofSchema,
-    correspondenceSchema: correspondenceSchema,
+    correspondenceAddress: correspondenceSchema,
     forms:forms_schema,
     fatca_details : fatcaSchema,
     signature:signature,
@@ -127,4 +126,4 @@ const clientVideoKycSchema = new mongoose.Schema({
     video: video,
 });
 
-module.exports = mongoose.model('ClientVideoKYC', clientVideoKycSchema);
+module.exports = mongoose.model('InvestorVideoKYC', investorVideoKycSchema);

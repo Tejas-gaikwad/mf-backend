@@ -1,6 +1,6 @@
 const clientSchema = require('../models/client');
 const InvestorSchema = require('../models/investor');
-const videoKYCSchema = require('../models/client_video_kyc');
+const videoKYCSchema = require('../models/investor_video_kyc');
 
 
 const updateClientVideoKycData = async (req, res) => {
@@ -13,25 +13,20 @@ const updateClientVideoKycData = async (req, res) => {
           return res.status(404).json({ message: 'Investor not found' });
         }
 
-        const { arn_number, user_details, identity, address, correspondenceSchema, forms, fatca_details, signature, photo, video, } = req.body;
-       
-        const clientId = req.params.clientId;
-        const clientData = await clientSchema.findById(clientId);
-        if (!clientData) {
-            return res.status(404).json({  "status" : false, message: 'Client not found' });
-        }
+        const { user_details, identity, address, correspondenceAddress, forms, fatca_details, signature, photo, video, } = req.body;
+     
 
-        const clientVideoKYCData = new videoKYCSchema({ investor_uid, arn_number, user_details, identity, address, correspondenceSchema, forms, fatca_details, signature, signature, photo, video,});
-        const savedClientData = await clientVideoKYCData.save();
-        clientData.client_video_kyc__data_uid =  savedClientData._id;
-        const updatedClient = await clientData.save();
-        if (!updatedClient) {
-            return res.status(404).json({  "status" : false, message: 'Cannot update client' });
+        const investorVideoKYCData = new videoKYCSchema({ investor_uid,  user_details, identity, address, correspondenceAddress, forms, fatca_details, signature, signature, photo, video,});
+        const savedData = await investorVideoKYCData.save();
+        investor.client_video_kyc__data_uid =  savedData._id;
+        const updatedInvestor = await investor.save();
+        if (!updatedInvestor) {
+            return res.status(404).json({  "status" : false, message: 'Cannot update data' });
         }
         return res.status(201).json({
           "status" : true,
           "message" : "Video KYC done.",
-          "data" : savedClientData
+          "data" : savedData
         });
     } catch(err){
         console.log("err --   ", err);

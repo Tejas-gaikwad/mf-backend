@@ -17,7 +17,7 @@ router.post('/:clientId/addClientMutualFundReport', authenticateToken, AddClient
 router.patch('/:clientId/updateClientData', authenticateToken, updateClientData);
 router.get('/:clientId/track_goal', authenticateToken, GoalTracking);
 router.get('/get_all_opportunities', authenticateToken, GetOpportunities);
-router.post('/:clientId/update_client_video_kyc', authenticateToken, updateClientVideoKycData);
+router.post('/update_client_video_kyc', authenticateToken, updateClientVideoKycData);
 
 
 module.exports = router;
