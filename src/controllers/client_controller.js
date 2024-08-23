@@ -3,6 +3,8 @@ const clientSchema = require('../models/client');
 const InvestorSchema = require('../models/investor');
 const mongoose = require('mongoose');
 const MutualFundMember = require('../models/mutual_fund');
+const nodemailer = require('nodemailer');
+
 
 
 
@@ -408,9 +410,41 @@ const GoalTracking = async (req, res) => {
 }
 
 
+const shareClientLoginCredentials = async (req, res) => {
+
+  const { to, subject, text, html } = req.body;
+
+  if (!to || !subject || !text) {
+      return res.status(400).send({ message: 'to, subject, and text fields are required' });
+  }
+
+  let transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+          user: 'your-email@gmail.com', 
+          pass: 'your-email-password'  
+      }
+  });
+
+  let mailOptions = {
+      from: '"Your Name" <your-email@gmail.com>', 
+      to,                                        
+      subject,                                   
+      text,                                      
+      html                                       
+  };
+
+  try {
+      let info = await transporter.sendMail(mailOptions);
+      res.status(200).send({ message: 'Email sent successfully', info });
+  } catch (error) {
+      res.status(500).send({ message: 'Failed to send email', error: error.message });
+  }
+
+}
 
   
-module.exports ={ AddClient, ListOfAllClients, updateClientData,  GetClientMFReport, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport, GoalTracking, GetOpportunities}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
+module.exports ={ AddClient, ListOfAllClients, updateClientData,  GetClientMFReport, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport, GoalTracking, GetOpportunities, shareClientLoginCredentials}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
 
 
 // const FatcaDetails = async (req, res) => {
