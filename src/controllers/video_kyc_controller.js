@@ -21,7 +21,7 @@ const updateClientVideoKycData = async (req, res) => {
             return res.status(404).json({  "status" : false, message: 'Client not found' });
         }
 
-        const clientVideoKYCData = new videoKYCSchema({ arn_number, user_details, identity, address, correspondenceSchema, forms, fatca_details, signature, signature, photo, video,});
+        const clientVideoKYCData = new videoKYCSchema({ investor_uid, arn_number, user_details, identity, address, correspondenceSchema, forms, fatca_details, signature, signature, photo, video,});
         const savedClientData = await clientVideoKYCData.save();
         clientData.client_video_kyc__data_uid =  savedClientData._id;
         const updatedClient = await clientData.save();
