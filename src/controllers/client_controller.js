@@ -337,6 +337,7 @@ const GetOpportunities = async (req, res) => {
           {
             "client_name" : (client.user_details.first_name ? client.user_details.first_name : "") + " " + (client.user_details.last_name ? client.user_details.last_name : ""),
             "client_pan_number" : client.user_details.pan_number,
+            "client_mobile_number" : client.user_details.mobile_number,
             "client_goal" : "House Planning - House",
             "bank_name" : "Kotak",
             "date" : "01 Feb 2025",
