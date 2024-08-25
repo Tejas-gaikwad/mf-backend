@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authroutes');
 const profileRoutes = require('./routes/profile_routes');
 const clientRoutes = require('./routes/client_routes');
 const researchRoutes = require('./routes/research_routes');
+const transactionRoutes = require('./routes/transaction_routes');
 const session = require('express-session');
 
 const app = express();
@@ -24,6 +25,8 @@ app.use('/api', authRoutes);
 app.use('/api', profileRoutes);
 app.use('/api', clientRoutes);
 app.use('/api', researchRoutes);
+app.use('/api', transactionRoutes);
+
 
 
 module.exports = app;
