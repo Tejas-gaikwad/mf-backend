@@ -129,4 +129,46 @@ const WhatsNew = async (req, res) => {
   }
 }
 
-module.exports = {GetInvestorProfile, GetNotifications, SendNotification, WhatsNew };
+const GetHomeDetails = async (req, res) => {
+  try{
+    const investor_uid = req.investor.investor_uid;
+    const investor = await  InvestorSchema.findOne({investor_uid});  
+    if (!investor) {
+      return res.status(404).json({ "status" : false, message: 'Investor not found' });
+    }
+    return res.status(200).json({
+      "status" : true,
+      "data" : [
+        {
+          "current_sip" : "2,25,654.05",
+          "current_AUM" : "48.79",
+          "current_AUM_increment" : "28,30,023",
+          "current_AUM_MOM_increment" : "+0.58%",
+          "equity" : "51.47%",
+          "debt" : "48.53%",
+          "cash" : "0%",
+          "current_sip" : "0",
+          "current_sip_mom_increment" : "0%",
+          "last_three_days_purchase" : "0",
+          "last_three_days_redemption" : "0",
+          "last_three_days_rej_trxns" : "0",
+          "last_three_days_new_sip" : "0",
+          "one_time_opportunity" : "600000",
+          "recurring_opportunity" : "0",
+
+        },
+      ]
+  });
+
+  }catch(err) {
+    console.log("error" + err);
+      res.status(400).json({
+          "status" : false,
+          "data" : "Error, Something went wrong."
+      });
+  }
+}
+
+
+
+module.exports = {GetInvestorProfile, GetNotifications, SendNotification, WhatsNew, GetHomeDetails };
