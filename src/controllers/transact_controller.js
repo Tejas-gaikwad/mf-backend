@@ -115,7 +115,7 @@ const UpdateTransactionExecutionDate = async (req, res) => {
 
   try{
     const investor_uid = req.investor.investor_uid;
-    const {date, clientId} = req.body;
+    const {date, amount, clientId} = req.body;
     const investor = await InvestorSchema.findOne({investor_uid});
     if (!investor) {
       return res.status(404).json({ message: 'Investor not found' });
@@ -134,7 +134,7 @@ const UpdateTransactionExecutionDate = async (req, res) => {
           "transaction_execution_date" : date,
           "folio_no" : "10569084",
           "name" : "HDFC Flexicap Fund - Growth option",
-          "amount" : "1000",
+          "amount" : amount,
           "BSE_client_id": "8787",
           "member_id" : "11689",
           "moh" : "SI",
