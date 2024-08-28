@@ -160,15 +160,14 @@ const GetHomeDetails = async (req, res) => {
       ]
   });
 
-  }catch(err) {
-    console.log("error" + err);
-      res.status(400).json({
+  } catch(err) {
+      console.log("error" + err);
+      return res.status(400).json({
           "status" : false,
           "data" : "Error, Something went wrong."
       });
   }
 }
-
 
 
 module.exports = {GetInvestorProfile, GetNotifications, SendNotification, WhatsNew, GetHomeDetails };

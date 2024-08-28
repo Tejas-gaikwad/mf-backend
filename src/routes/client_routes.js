@@ -1,4 +1,4 @@
-const{ AddClient, ListOfAllClients, GetClientMFReport, GoalTracking, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport,  updateClientData, GetOpportunities } = require('../controllers/client_controller'); //  FatcaDetails, AddUserDetails, AddBankDetails, ClientDeskSettings,
+const{ AddClient, ListOfAllClients, GetClientMFReport, GoalTracking, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport,  updateClientData, GetOpportunities, ShareClientLoginCredentials, ClientTracker } = require('../controllers/client_controller'); //  FatcaDetails, AddUserDetails, AddBankDetails, ClientDeskSettings,
 const{ authenticateToken,  } = require('../middlewares/auth_middleware');
 const { updateClientVideoKycData } = require('../controllers/video_kyc_controller');
 const express = require('express');
@@ -18,6 +18,11 @@ router.patch('/:clientId/updateClientData', authenticateToken, updateClientData)
 router.get('/:clientId/track_goal', authenticateToken, GoalTracking);
 router.get('/get_all_opportunities', authenticateToken, GetOpportunities);
 router.post('/update_client_video_kyc', authenticateToken, updateClientVideoKycData);
+
+router.post('/share_client_login_creds', authenticateToken, ShareClientLoginCredentials);
+router.get('/track_clients', authenticateToken, ClientTracker);
+
+
 
 
 module.exports = router;

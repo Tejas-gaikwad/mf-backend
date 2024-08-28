@@ -411,7 +411,7 @@ const GoalTracking = async (req, res) => {
 }
 
 
-const shareClientLoginCredentials = async (req, res) => {
+const ShareClientLoginCredentials = async (req, res) => {
 
   const { to, subject, text, html } = req.body;
 
@@ -439,13 +439,54 @@ const shareClientLoginCredentials = async (req, res) => {
       let info = await transporter.sendMail(mailOptions);
       res.status(200).send({ message: 'Email sent successfully', info });
   } catch (error) {
-      res.status(500).send({ message: 'Failed to send email', error: error.message });
+      return res.status(500).send({ message: 'Failed to send email', error: error.message });
   }
-
 }
 
+const ClientTracker = async (req, res) => {
+  try{
+    const clientData = [];
+    const investor_uid = req.investor.investor_uid;
+    const investor = await InvestorSchema.findOne({investor_uid});
+    if (!investor) {
+        return res.status(404).json({ message: 'Investor not found' });
+    }
+
+    const locations = [
+      { latitude: "18°36'30.7", longitude: "73°46'27.0" },
+      { latitude: "18.611814", longitude: "73.762289" },
+      { latitude: "18.602175", longitude: "73.749712" },
+      { latitude: "18.608797", longitude: "73.724910" }
+  ];
+
+      // Ensure we have enough locations or loop through them
+      for (let i = 0; i < investor.clients.length; i++) {
+        const clientId = investor.clients[i];
+        const location = locations[i % locations.length]; // Cycle through locations if necessary
+
+        const client = {
+            client_id: clientId,
+            latitude: location.latitude,
+            longitude: location.longitude
+        };
+
+        clientData.push(client);
+    }
+
+
+    return res.status(500).json({ 
+      "status"  : true,
+      "data" : clientData,
+     });
+  }catch(err) {
+    return res.status(500).send({ message: 'Error, Something went wrong', error: err.message });
+  }
+}
+
+
+
   
-module.exports ={ AddClient, ListOfAllClients, updateClientData,  GetClientMFReport, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport, GoalTracking, GetOpportunities, shareClientLoginCredentials}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
+module.exports ={ AddClient, ListOfAllClients, updateClientData,  GetClientMFReport, GetClientWealthReport, GetClientInformation, AddClientMutualFundReport, GoalTracking, GetOpportunities, ShareClientLoginCredentials, ClientTracker}; // AddUserDetails, AddBankDetails, ClientDeskSettings, FatcaDetails,
 
 
 // const FatcaDetails = async (req, res) => {
