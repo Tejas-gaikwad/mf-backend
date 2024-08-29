@@ -16,4 +16,5 @@ router.get('/switch_and_STP_AMC', authenticateToken, SwitchAndStpAMC);
 
 
 
+
 module.exports = router;

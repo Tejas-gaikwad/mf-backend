@@ -557,28 +557,28 @@ const UpdateTransactionExecutionDate = async (req, res) => {
           "scheme_type" : "EQUITY",
           "scheme_min_investment" : "100",
           "scheme_launch_date" : "Aug 23 2024",
-          "scheme_launch_date" : "Sep 6 2024",
+          "scheme_close_date" : "Sep 6 2024",
         },
         {
           "scheme_name" : "Axis consumption Fund - Regular Plan - Growth",
           "scheme_type" : "EQUITY",
           "scheme_min_investment" : "100",
           "scheme_launch_date" : "Aug 23 2024",
-          "scheme_launch_date" : "Sep 6 2024",
+          "scheme_close_date" : "Sep 6 2024",
         },
         {
           "scheme_name" : "Axis consumption Fund - Regular Plan - Growth",
           "scheme_type" : "EQUITY",
           "scheme_min_investment" : "100",
           "scheme_launch_date" : "Aug 23 2024",
-          "scheme_launch_date" : "Sep 6 2024",
+          "scheme_close_date" : "Sep 6 2024",
         },
         {
           "scheme_name" : "Axis consumption Fund - Regular Plan - Growth",
           "scheme_type" : "EQUITY",
           "scheme_min_investment" : "100",
           "scheme_launch_date" : "Aug 23 2024",
-          "scheme_launch_date" : "Sep 6 2024",
+          "scheme_close_date" : "Sep 6 2024",
         },
       ]
     });
