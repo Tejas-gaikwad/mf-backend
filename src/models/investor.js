@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+
 const investorSchema = new mongoose.Schema({
     investor_uid: { type:  mongoose.Schema.Types.ObjectId,  unique: true },
     arnNumber: { type: String,  unique: true },
@@ -13,7 +14,7 @@ const investorSchema = new mongoose.Schema({
     password : {type: String,},
     clients: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Client', default: [] }],
     notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'notifications', default: [] }],
-    crm_settings : { type: mongoose.Schema.Types.ObjectId, ref: 'CrmSettings',  },
+    crm_settings: { type: mongoose.Schema.Types.ObjectId, ref: 'CrmSettings' }
   });
 
   investorSchema.pre('save', async function (next) {
@@ -23,7 +24,7 @@ const investorSchema = new mongoose.Schema({
 
   try {
     const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    this.password = await bcrypt.hash(this.password, salt); 
     next();
   } catch (err) {
     next(err);

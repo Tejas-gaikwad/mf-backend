@@ -181,9 +181,7 @@ const ValidatePanCard = async (req, res) => {
     if (!investor) {
       return res.status(404).json({ "status" : false, message: 'Investor not found' });
     }
-
     const existingInvestor = await InvestorVideoKYC.findOne({ 'identity.pan_number': pan_number }); 
-
     if (existingInvestor) {
       return res.status(200).json({ "status" : false, error: 'This PAN card is already associated with an investor' });
     }

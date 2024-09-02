@@ -7,6 +7,7 @@
 const InvestorSchema = require('../models/investor');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const CrmSettings = require('../models/crm_schema');
 
 const generateAccessToken = (investor) => {
     return jwt.sign({ id: investor.id, investor_uid: investor.investor_uid }, 'mutual_fund_jwt_secret_key', { expiresIn: '1h' }); // Replace with a strong secret key
@@ -161,13 +162,57 @@ const BecomeMember = async (req, res) => {
             { new: true }
         );
 
-        res.status(201).json(updatedInvestor);
+        if (!updatedInvestor.crm_settings) {
+            updatedInvestor.crm_settings = {
+                crm_setting_uid: updatedInvestor._id,
+                categoryRuleSchema: [],
+                riskProfileRuleSchema: []
+            };
+        }
+        
+            const defaultCategoryRule = {
+                category_name: 'Default Category Rule',
+                minimum_aum_range: "10",
+                maximum_aum_range: "100",
+                investor_uid: updatedInvestor._id
+            };
+
+            const defaultRiskProfileRule = {
+                profile_name: "default profile name",
+                minimum_age_range: "HNI",
+                maximum_age_range:"100",
+                investor_uid: updatedInvestor._id
+            };
+
+            const crmSettingsData = new CrmSettings({
+                crm_setting_uid: updatedInvestor._id,
+                categoryRuleSchema: [defaultCategoryRule],
+                riskProfileRuleSchema: [defaultRiskProfileRule]
+            });
+
+            const savedCrmSettings = await crmSettingsData.save();
+    
+
+            updatedInvestor.crm_settings = savedCrmSettings._id;
+            await updatedInvestor.save();
+    
+            return res.status(201).json({
+                "status" : true,
+                "data" : updatedInvestor
+            });
+
     } catch(err){
             console.log('Error -------   '+err);
         if (err.code === 11000) {
-            res.status(400).json({ message: 'Please enter unique values.' });
+            return res.status(400).json({ 
+                "status" : false,
+                message: 'Please enter unique values.'
+             });
         } else {
-            res.status(400).json({ message: 'Error, Something went wrong.' });
+            return res.status(400).json({
+                "status" : false,
+                message: 'Error, Something went wrong.'
+             });
         }
     }
 }
