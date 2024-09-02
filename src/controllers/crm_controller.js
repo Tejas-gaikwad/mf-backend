@@ -45,10 +45,12 @@ const SetCRMRuleSetting = async (req, res) => {
             message: 'CRM settings updated successfully',
             crm_settings: crmSettings
         });
+
+
     } catch(err) {
         return res.status(200).json({
             "status" : false,
-            "message" : "Error, Something went wrong.",
+            "error" : "Error, Something went wrong.",
             "message" : err.message,
         });
     }
@@ -87,18 +89,6 @@ const GetCRMRuleSetting = async (req, res) => {
 }
 
 const ShowClientForBulkAnalysis = async (req, res) => {
-    // const investor_uid = req.investor.investor_uid; 
-    // const { client_or_family, client_details, record_option } = req.body;
-
-    // if(record_option == "all_records") {
-
-    //     const investor = await investorSchema.findOne({ investor_uid }).populate('clients');
-
-    //     return res.status(200).json({
-    //         message: 'Clients Data retrieved successfully',
-    //         clients:  investor.clients
-    //     });
-    // } 
 
 
    try{
@@ -155,48 +145,6 @@ const ShowClientForBulkAnalysis = async (req, res) => {
 
    }
 
-    
-
-    // console.log("searchQuery   ---    "+ searchQuery);
-
-    // // Filter for clients with missing fields if excludeIncomplete is true
-    // if (excludeIncomplete) {
-
-    //     query.$or = query.$or || [];
-    //     query.$or.push(
-    //         { 'user_details.first_name': { $exists: false } },
-    //         { 'user_details.last_name': { $exists: false } },
-    //         // { 'clients.applicant_city': { $exists: false } },
-    //         // { 'clients.applicant_pincode': { $exists: false } },
-    //         // { 'clients.risk_profile': { $exists: false } },
-    //         // { 'clients.category': { $exists: false } },
-    //         // { 'clients.company': { $exists: false } },
-    //         // { 'clients.designation': { $exists: false } }
-    //     );
-
-    //     console.log("query   ---    "+ query);
-    //     const clients = await clientSchema.find(query);
-    //     return res.status(200).json({ 
-    //                 message: 'Clients retrieved successfully.',
-    //                 clients:clients
-    //             });
-    
-    // } 
-
-
-    // console.log("NOTHING TO QUERY   ---    ");
-
-
-    //     const clients = await clientSchema.find(query);
-
-    //     return res.status(200).json({ 
-    //                 message: 'Clients retrieved successfully.',
-    //                 clients:clients
-    //             });
-    
-
-    // // Find the clients based on the query
-   
 
 }
 

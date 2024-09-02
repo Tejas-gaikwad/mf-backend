@@ -1,5 +1,6 @@
 const InvestorSchema = require('../models/investor');
 const Notifications = require('../models/notification');
+const InvestorVideoKYC = require("../models/investor_video_kyc");
 
 const GetInvestorProfile = async (req, res, next) => {
     try{
@@ -169,5 +170,37 @@ const GetHomeDetails = async (req, res) => {
   }
 }
 
+const ValidatePanCard = async (req, res) => {
+  try{
 
-module.exports = {GetInvestorProfile, GetNotifications, SendNotification, WhatsNew, GetHomeDetails };
+    const investor_uid = req.investor.investor_uid;
+    const investor = await  InvestorSchema.findOne({investor_uid}); 
+
+    const {pan_number} = req.body;
+
+    if (!investor) {
+      return res.status(404).json({ "status" : false, message: 'Investor not found' });
+    }
+
+    const existingInvestor = await InvestorVideoKYC.findOne({ 'identity.pan_number': pan_number }); 
+
+    if (existingInvestor) {
+      return res.status(200).json({ "status" : false, error: 'This PAN card is already associated with an investor' });
+    }
+
+    return res.status(200).json({ "status" : true, error: 'This PAN card is not associated with any user.' });
+
+    
+
+  }catch(err){
+    console.log("error" + err);
+    return res.status(400).json({
+        "status" : false,
+        "error" : "Error, Something went wrong.",
+        "message" : err.message,
+    });
+  }
+}
+
+
+module.exports = {GetInvestorProfile, GetNotifications, SendNotification, WhatsNew, GetHomeDetails, ValidatePanCard };
