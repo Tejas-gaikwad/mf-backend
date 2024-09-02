@@ -45,6 +45,7 @@ const ChangePassword = async (req, res) => {
  
 const Login = async (req, res) => {
     try{
+        console.log("LOGIN API CALL");
         const {login_type, mobile, password} = req.body;
         if(!login_type || !mobile || !password) {
             return res.status(400).json({

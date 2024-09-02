@@ -22,11 +22,16 @@ const userDetailsSchema = new mongoose.Schema({
     nominee_relation: String,
     nominee_percentage: String,
     is_nominee_minor: Boolean,
-    applicant_contact_address: String,
-    applicant_city: String,
-    applicant_pincode: String,
-    applicant_state: String,
-    applicant_country: String,
+    contact_address: String,
+    city:  { type: String, default : ""},
+    pincode: { type: String, default : ""},
+    state: String,
+    country: String,
+    risk_profile:{ type: String, default : ""},
+    category: { type: String, default : ""},
+    company: { type: String, default : ""},
+    designation: { type: String, default : ""},
+
 }, { _id: false });
 
 

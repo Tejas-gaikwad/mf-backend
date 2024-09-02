@@ -2,7 +2,7 @@
 const mongoose = require('mongoose')
 const app = require('./src/app');
 const url = 'mongodb+srv://manojnandanwar:Thescorpionking3@mf-db.2kzvcgu.mongodb.net/?retryWrites=true&w=majority&appName=mf-db'; // Replace with your MongoDB URL
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3003;
 
 async function main() {
   try {
