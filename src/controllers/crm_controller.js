@@ -58,7 +58,7 @@ const SetCRMRuleSetting = async (req, res) => {
 const UpdateRuleSetting = async (req, res) => {
     try {
         const { ruleType, identifier, details } = req.body;
-        const investor_uid = req.params.investor_uid;
+        const investor_uid = req.investor.investor_uid;
         const investor = await investorSchema.findOne({ investor_uid }).populate('crm_settings');
         if (!investor) {
             return res.status(404).json({ message: 'Investor not found' });
@@ -104,35 +104,22 @@ const UpdateRuleSetting = async (req, res) => {
 
 const RemoveCRMRule = async (req, res) => {
     try {
-        const { crmSettingId, ruleId } = req.params;
-
-        console.log("crmSettingId ===   "+ crmSettingId);
-        console.log("ruleId ===   "+ ruleId);
-
-
-        // Find CRM settings document
-        const crmSettings = await CrmSettings.findOne(crmSettingId);
+        const { investor_uid, ruleId } = req.body;
+        const investor = await investorSchema.findOne({ investor_uid }).populate('crm_settings');
+        if (!investor) {
+            return res.status(404).json({ message: 'Investor not found' });
+        }
+        let crmSettings = investor.crm_settings;
         if (!crmSettings) {
-            return res.status(404).json({ message: 'CRM settings not found.' });
+            return res.status(404).json({ message: 'CRM settings not found for this investor' });
         }
-
-        // Remove the rule by ID from the appropriate array
-        const initialCategoryLength = crmSettings.categoryRuleSchema.length;
         crmSettings.categoryRuleSchema = crmSettings.categoryRuleSchema.filter(rule => rule._id.toString() !== ruleId);
-        
-        const initialRiskProfileLength = crmSettings.riskProfileRuleSchema.length;
         crmSettings.riskProfileRuleSchema = crmSettings.riskProfileRuleSchema.filter(rule => rule._id.toString() !== ruleId);
-
-        // Check if the rule was found and removed
-        if (crmSettings.categoryRuleSchema.length === initialCategoryLength && crmSettings.riskProfileRuleSchema.length === initialRiskProfileLength) {
-            return res.status(404).json({ message: 'Rule not found.' });
-        }
-
-        // Save the updated CRM settings
         await crmSettings.save();
-
-        return res.status(200).json({ message: 'Rule removed successfully.', crmSettings });
-   
+        return res.status(200).json({
+            status: true,
+            message: 'Category rule deleted successfully'
+        });
     } catch (err) {
         console.error('Error removing rule: ', err);
         return res.status(500).json({ message: 'Error removing rule.', error: err.message });
