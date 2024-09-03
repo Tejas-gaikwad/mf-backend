@@ -57,41 +57,52 @@ const SetCRMRuleSetting = async (req, res) => {
 
 const UpdateRuleSetting = async (req, res) => {
     try {
-        const { ruleType, identifier, details } = req.body;
+        const {  ruleId, updatedRule } = req.body;
         const investor_uid = req.investor.investor_uid;
-        const investor = await investorSchema.findOne({ investor_uid }).populate('crm_settings');
-        if (!investor) {
-            return res.status(404).json({ message: 'Investor not found' });
-        }
-        let crmSettings = investor.crm_settings;
-        if (!crmSettings) {
-            return res.status(404).json({ message: 'CRM settings not found for this investor' });
-        }
-        let ruleUpdated = false;
-        if (ruleType === 'category') {
-            const rule = crmSettings.categoryRuleSchema.find(rule => rule.category_name === identifier);
-            if (rule) {
-                Object.assign(rule, details);
-                ruleUpdated = true;
+         const investor = await investorSchema.findOne({ investor_uid }).populate('crm_settings');
+         if (!investor) {
+             return res.status(404).json({ message: 'Investor not found' });
+         }
+ 
+         let crmSettings = investor.crm_settings;
+         if (!crmSettings) {
+             return res.status(404).json({ message: 'CRM settings not found for this investor' });
+         }
+ 
+        // Initialize a flag to track whether the rule was found and updated
+        // Initialize a flag to track whether the rule was found and updated
+        let ruleFound = false;
+
+        // Update the rule in categoryRuleSchema
+        for (let i = 0; i < crmSettings.categoryRuleSchema.length; i++) {
+            if (crmSettings.categoryRuleSchema[i]._id.toString() === ruleId) {
+                // Update the rule
+                crmSettings.categoryRuleSchema[i] = { ...crmSettings.categoryRuleSchema[i]._doc, ...updatedRule };
+                ruleFound = true;
+                break;
             }
-        } else if (ruleType === 'riskProfile') {
-            const rule = crmSettings.riskProfileRuleSchema.find(rule => rule.profile_name === identifier);
-            if (rule) {
-                Object.assign(rule, details);
-                ruleUpdated = true;
+        }
+
+        // If the rule wasn't found in categoryRuleSchema, check riskProfileRuleSchema
+        if (!ruleFound) {
+            for (let i = 0; i < crmSettings.riskProfileRuleSchema.length; i++) {
+                if (crmSettings.riskProfileRuleSchema[i]._id.toString() === ruleId) {
+                    // Update the rule
+                    crmSettings.riskProfileRuleSchema[i] = { ...crmSettings.riskProfileRuleSchema[i]._doc, ...updatedRule };
+                    ruleFound = true;
+                    break;
+                }
             }
-        } else {
-            return res.status(400).json({ message: 'Invalid rule type' });
         }
-        if (!ruleUpdated) {
-            return res.status(404).json({ message: 'Rule not found' });
-        }
-        await crmSettings.save();
-        return res.status(200).json({
-            status: true,
-            message: 'Rule updated successfully',
-            updated_rule: { ruleType, identifier, details }
-        });
+         if (!ruleFound) {
+             return res.status(404).json({ message: 'Rule not found' });
+         }
+         await crmSettings.save();
+         return res.status(200).json({
+             status: true,
+             message: 'Rule updated successfully',
+             crm_settings: crmSettings
+         });
     } catch (err) {
         return res.status(500).json({
             status: false,
@@ -104,7 +115,8 @@ const UpdateRuleSetting = async (req, res) => {
 
 const RemoveCRMRule = async (req, res) => {
     try {
-        const { investor_uid, ruleId } = req.body;
+        const { ruleId } = req.body;
+        const investor_uid = req.investor.investor_uid;
         const investor = await investorSchema.findOne({ investor_uid }).populate('crm_settings');
         if (!investor) {
             return res.status(404).json({ message: 'Investor not found' });

@@ -10,7 +10,7 @@ router.get('/get_crm_setting', authenticateToken, GetCRMRuleSetting);
 router.get('/get_client_list_bulk_analysis', authenticateToken, ShowClientForBulkAnalysis);
 router.get('/search_client', authenticateToken, SearchClient);
 router.delete('/delete_rule', authenticateToken, RemoveCRMRule);
-router.put('/update-rule', authenticateToken, UpdateRuleSetting);
+router.put('/update_rule', authenticateToken, UpdateRuleSetting);
 
 
 
