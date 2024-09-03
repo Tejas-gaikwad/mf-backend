@@ -3,7 +3,6 @@ const investorSchema = require('../models/investor');
 const clientSchema = require('../models/client');
 
 
-
 const SetCRMRuleSetting = async (req, res) => {
     try{
         const { categoryRules, riskProfileRules } = req.body;
@@ -22,35 +21,20 @@ const SetCRMRuleSetting = async (req, res) => {
             await crmSettings.save();
         }
 
-        // Update categoryRules
-        categoryRules.forEach(newRule => {
-            const existingRule = crmSettings.categoryRuleSchema.find(
-                rule => rule.category_name === newRule.category_name
-            );
-            if (existingRule) {
-                // Update existing rule
-                existingRule.minimum_aum_range = newRule.minimum_aum_range;
-                existingRule.maximum_aum_range = newRule.maximum_aum_range;
-            } else {
-                // Add new rule
-                crmSettings.categoryRuleSchema.push({ ...newRule, investor_uid: investor._id });
-            }
-        });
+        crmSettings.categoryRuleSchema = [];
+        crmSettings.riskProfileRuleSchema = [];
 
-        // Update riskProfileRules
-        riskProfileRules.forEach(newRule => {
-            const existingRule = crmSettings.riskProfileRuleSchema.find(
-                rule => rule.profile_name === newRule.profile_name
-            );
-            if (existingRule) {
-                // Update existing rule
-                existingRule.minimum_age_range = newRule.minimum_age_range;
-                existingRule.maximum_age_range = newRule.maximum_age_range;
-            } else {
-                // Add new rule
-                crmSettings.riskProfileRuleSchema.push({ ...newRule, investor_uid: investor._id });
-            }
-        });
+        const newCategoryRules = categoryRules.map(rule => ({
+            ...rule,
+            investor_uid: investor._id
+        }));
+        crmSettings.categoryRuleSchema.push(...newCategoryRules);
+
+        const newRiskProfileRules = riskProfileRules.map(rule => ({
+            ...rule,
+            investor_uid: investor._id
+        }));
+        crmSettings.riskProfileRuleSchema.push(...newRiskProfileRules);
 
         await crmSettings.save();
         await investor.save();
@@ -62,45 +46,6 @@ const SetCRMRuleSetting = async (req, res) => {
         });
 
 
-        // const { categoryRules, riskProfileRules } = req.body;
-        // const investor_uid = req.investor.investor_uid;
-
-        // // Fetch the investor document by investor_uid
-        // const investor = await investorSchema.findOne({ investor_uid }).populate('crm_settings');
-        // if (!investor) {
-        //     return res.status(404).json({ message: 'Investor not found' });
-        // }
- 
-        // let crmSettings = investor.crm_settings;
-        // if (!crmSettings) {
-        //     crmSettings = new CrmSettings({ crm_setting_uid: investor._id });
-        //     investor.crm_settings = crmSettings._id;
-        //     await crmSettings.save();
-        // }
-
-        // const newCategoryRules = categoryRules.map(rule => ({
-        //     ...rule,
-        //     investor_uid: investor._id
-        // }));
-
-        // const newRiskProfileRules = riskProfileRules.map(rule => ({
-        //     ...rule,
-        //     investor_uid: investor._id
-        // }));
-
-        // crmSettings.categoryRuleSchema.push(...newCategoryRules);
-        // crmSettings.riskProfileRuleSchema.push(...newRiskProfileRules);
-
-        // await crmSettings.save();
-        // await investor.save();
-
-        // return res.status(200).json({
-        //     "status" : true,
-        //     message: 'CRM settings updated successfully',
-        //     crm_settings: crmSettings
-        // });
-
-
     } catch(err) {
         return res.status(200).json({
             "status" : false,
@@ -109,6 +54,53 @@ const SetCRMRuleSetting = async (req, res) => {
         });
     }
 }
+
+const UpdateRuleSetting = async (req, res) => {
+    try {
+        const { ruleType, identifier, details } = req.body;
+        const investor_uid = req.params.investor_uid;
+        const investor = await investorSchema.findOne({ investor_uid }).populate('crm_settings');
+        if (!investor) {
+            return res.status(404).json({ message: 'Investor not found' });
+        }
+        let crmSettings = investor.crm_settings;
+        if (!crmSettings) {
+            return res.status(404).json({ message: 'CRM settings not found for this investor' });
+        }
+        let ruleUpdated = false;
+        if (ruleType === 'category') {
+            const rule = crmSettings.categoryRuleSchema.find(rule => rule.category_name === identifier);
+            if (rule) {
+                Object.assign(rule, details);
+                ruleUpdated = true;
+            }
+        } else if (ruleType === 'riskProfile') {
+            const rule = crmSettings.riskProfileRuleSchema.find(rule => rule.profile_name === identifier);
+            if (rule) {
+                Object.assign(rule, details);
+                ruleUpdated = true;
+            }
+        } else {
+            return res.status(400).json({ message: 'Invalid rule type' });
+        }
+        if (!ruleUpdated) {
+            return res.status(404).json({ message: 'Rule not found' });
+        }
+        await crmSettings.save();
+        return res.status(200).json({
+            status: true,
+            message: 'Rule updated successfully',
+            updated_rule: { ruleType, identifier, details }
+        });
+    } catch (err) {
+        return res.status(500).json({
+            status: false,
+            error: "Error, Something went wrong.",
+            message: err.message,
+        });
+    }
+};
+
 
 const RemoveCRMRule = async (req, res) => {
     try {
@@ -270,4 +262,4 @@ const SearchClient = async (req, res) => {
 }
 
 
-module.exports = {SetCRMRuleSetting, GetCRMRuleSetting, ShowClientForBulkAnalysis, SearchClient, RemoveCRMRule, };
+module.exports = {SetCRMRuleSetting, GetCRMRuleSetting, ShowClientForBulkAnalysis, SearchClient, RemoveCRMRule, UpdateRuleSetting};
