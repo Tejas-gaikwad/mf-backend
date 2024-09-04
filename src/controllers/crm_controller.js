@@ -8,7 +8,6 @@ const SetCRMRuleSetting = async (req, res) => {
         const { categoryRules, riskProfileRules } = req.body;
         const investor_uid = req.investor.investor_uid;
 
-        // Fetch the investor document by investor_uid
         const investor = await investorSchema.findOne({ investor_uid }).populate('crm_settings');
         if (!investor) {
             return res.status(404).json({ message: 'Investor not found' });
@@ -69,25 +68,19 @@ const UpdateRuleSetting = async (req, res) => {
              return res.status(404).json({ message: 'CRM settings not found for this investor' });
          }
  
-        // Initialize a flag to track whether the rule was found and updated
-        // Initialize a flag to track whether the rule was found and updated
         let ruleFound = false;
 
-        // Update the rule in categoryRuleSchema
         for (let i = 0; i < crmSettings.categoryRuleSchema.length; i++) {
             if (crmSettings.categoryRuleSchema[i]._id.toString() === ruleId) {
-                // Update the rule
                 crmSettings.categoryRuleSchema[i] = { ...crmSettings.categoryRuleSchema[i]._doc, ...updatedRule };
                 ruleFound = true;
                 break;
             }
         }
 
-        // If the rule wasn't found in categoryRuleSchema, check riskProfileRuleSchema
         if (!ruleFound) {
             for (let i = 0; i < crmSettings.riskProfileRuleSchema.length; i++) {
                 if (crmSettings.riskProfileRuleSchema[i]._id.toString() === ruleId) {
-                    // Update the rule
                     crmSettings.riskProfileRuleSchema[i] = { ...crmSettings.riskProfileRuleSchema[i]._doc, ...updatedRule };
                     ruleFound = true;
                     break;
@@ -260,5 +253,68 @@ const SearchClient = async (req, res) => {
     }
 }
 
+const ClientAnalysisReport = async (req, res) => {
+    try {
 
-module.exports = {SetCRMRuleSetting, GetCRMRuleSetting, ShowClientForBulkAnalysis, SearchClient, RemoveCRMRule, UpdateRuleSetting};
+        const investor_uid = req.investor.investor_uid;
+
+        const clients = await clientSchema.find({ investor_uid: investor_uid }).select('user_details.city user_details.pincode user_details.risk_profile user_details.category user_details.company user_details.designation');
+
+        console.log("clients  ----    "+ clients);
+
+        const cityWiseClients = clients.reduce((acc, client) => {
+            const city = client.user_details.city || 'Unknown'; // Handle clients with no city specified
+            acc[city] = (acc[city] || 0) + 1;
+            return acc;
+        }, {});
+
+        const pincodeWiseClients = clients.reduce((acc, client) => {
+            const pincode = client.user_details.pincode || 'Unknown'; // Handle clients with no city specified
+            acc[pincode] = (acc[pincode] || 0) + 1;
+            return acc;
+        }, {});
+
+        const riskProfileWiseClients = clients.reduce((acc, client) => {
+            const risk_profile = client.user_details.risk_profile || 'NA'; // Handle clients with no city specified
+            acc[risk_profile] = (acc[risk_profile] || 0) + 1;
+            return acc;
+        }, {});
+
+        const categoryeWiseClients = clients.reduce((acc, client) => {
+            const category = client.user_details.category || 'NA'; // Handle clients with no city specified
+            acc[category] = (acc[category] || 0) + 1;
+            return acc;
+        }, {});
+
+        const companyWiseClients = clients.reduce((acc, client) => {
+            const company = client.user_details.company || 'NA'; // Handle clients with no city specified
+            acc[company] = (acc[company] || 0) + 1;
+            return acc;
+        }, {});
+
+        const designationWiseClients = clients.reduce((acc, client) => {
+            const designation = client.user_details.designation || 'NA'; // Handle clients with no city specified
+            acc[designation] = (acc[designation] || 0) + 1;
+            return acc;
+        }, {});
+
+        return res.json({
+            "status" : true,
+            "city": cityWiseClients,
+            "pincode" : pincodeWiseClients,
+            "riskProfile" : riskProfileWiseClients,
+            "category" : categoryeWiseClients,
+            "company" : companyWiseClients,
+            "designation" : designationWiseClients,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            "status" : false,
+            "error" : 'Server Error', 
+            "message" : error.message
+        });
+    }
+}
+
+module.exports = {SetCRMRuleSetting, GetCRMRuleSetting, ShowClientForBulkAnalysis, SearchClient, RemoveCRMRule, UpdateRuleSetting, ClientAnalysisReport};
