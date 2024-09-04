@@ -14,7 +14,8 @@ const investorSchema = new mongoose.Schema({
     password : {type: String,},
     clients: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Client', default: [] }],
     notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'notifications', default: [] }],
-    crm_settings: { type: mongoose.Schema.Types.ObjectId, ref: 'CrmSettings' }
+    crm_settings: { type: mongoose.Schema.Types.ObjectId, ref: 'CrmSettings' },
+    vendors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vendors', default: [] }],
   });
 
   investorSchema.pre('save', async function (next) {

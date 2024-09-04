@@ -1,6 +1,7 @@
 const {CrmSettings} = require('../models/crm_schema');
 const investorSchema = require('../models/investor');
 const clientSchema = require('../models/client');
+const Vendor = require('../models/vendor');
 
 
 const SetCRMRuleSetting = async (req, res) => {
@@ -258,9 +259,12 @@ const ClientAnalysisReport = async (req, res) => {
 
         const investor_uid = req.investor.investor_uid;
 
+
+
         const clients = await clientSchema.find({ investor_uid: investor_uid }).select('user_details.city user_details.pincode user_details.risk_profile user_details.category user_details.company user_details.designation');
 
         console.log("clients  ----    "+ clients);
+
 
         const cityWiseClients = clients.reduce((acc, client) => {
             const city = client.user_details.city || 'Unknown'; // Handle clients with no city specified
@@ -317,4 +321,130 @@ const ClientAnalysisReport = async (req, res) => {
     }
 }
 
-module.exports = {SetCRMRuleSetting, GetCRMRuleSetting, ShowClientForBulkAnalysis, SearchClient, RemoveCRMRule, UpdateRuleSetting, ClientAnalysisReport};
+const AddVendor = async (req, res) => {
+
+   try{
+        const { vendor_name, mobile_number, email_address, address } = req.body;
+        const investor_uid = req.investor.investor_uid;
+
+        const investor = await investorSchema.findOne({ investor_uid });
+
+        if (!investor) {
+            return res.status(404).json({ message: 'Investor not found' });
+        }
+
+        const newVendor = new Vendor({
+            vendor_name,
+            mobile_number,
+            email_address,
+            address
+        });
+
+        const savedVendor = await newVendor.save();
+
+        await investorSchema.findByIdAndUpdate(investor_uid, {
+            $push: { vendors: savedVendor._id }
+        });
+
+       return res.status(201).json({ message: 'Vendor added successfully', vendorId: savedVendor._id });
+   }  catch (error) {
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            res.status(400).json({
+                message: `Error: Duplicate value for ${field}. This field must be unique.`,
+                field: field,
+                value: error.keyValue[field]
+            });
+        } else{
+            console.error(error);
+            return res.status(500).send('Server Error');
+        }
+    }
+}
+
+const GetAllVendors  = async (req, res) => {
+
+    try{
+
+        const investor_uid = req.investor.investor_uid;
+        const investor = await investorSchema.findById(investor_uid).populate('vendors'); //
+        if(!investor) {
+            return res.json({
+                "status" : false,
+                "message" : "No investor available"
+            })
+        }
+        return res.json({
+            "status" : true,
+            "vendors": investor.vendors
+        });
+
+    }catch(err) {
+        console.error(err);
+        return res.json({
+            "status" : false,
+            "message" : "Something went wrong",
+            "error" : err.message
+        })
+    }
+
+}
+
+const UpdateVendor = async (req, res) => {
+    try{
+        const {vendorId} = req.params;
+        // const { vendor_name, mobile_number, email_address, address } = req.body;
+        const updateData = req.body;
+
+        const investor_uid = req.investor.investor_uid;
+
+        const investor = await investorSchema.findOne({ investor_uid });
+
+        if (!investor) {
+            return res.status(404).json({ message: 'Investor not found' });
+        }
+
+        const updatedVendor = await Vendor.findByIdAndUpdate(vendorId, updateData, { new: true, runValidators: true });
+
+        if (!updatedVendor) {
+            return res.status(404).json({ message: 'Vendor not found' });
+        }
+
+        return res.status(200).json({  "status" : true, message: 'Vendor updated successfully', vendor: updatedVendor });
+    }catch(err) {
+        console.error(err);
+        return res.json({
+            "status" : false,
+            "message" : "Something went wrong",
+            "error" : err.message
+        })
+    }
+}
+
+const DeleteVendor = async (req, res) => {
+    try{
+        const {vendorId} = req.params;
+        const investor_uid = req.investor.investor_uid;
+        const investor = await investorSchema.findOne({ investor_uid });
+        if (!investor) {
+            return res.status(404).json({ message: 'Investor not found' });
+        }
+
+        const deletedVendor = await Vendor.findByIdAndDelete(vendorId);
+
+        if (!deletedVendor) {
+            return res.status(404).json({ message: 'Vendor not found' });
+        }
+
+        return res.status(200).json({  "status" : true, message: 'Vendor Deleted successfully'});
+    }catch(err) {
+        console.error(err);
+        return res.json({
+            "status" : false,
+            "message" : "Something went wrong",
+            "error" : err.message
+        })
+    }
+}
+
+module.exports = {SetCRMRuleSetting, GetCRMRuleSetting, ShowClientForBulkAnalysis, SearchClient, RemoveCRMRule, UpdateRuleSetting, ClientAnalysisReport, AddVendor, GetAllVendors, UpdateVendor, DeleteVendor};
