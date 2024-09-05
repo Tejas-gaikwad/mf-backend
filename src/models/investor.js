@@ -16,6 +16,8 @@ const investorSchema = new mongoose.Schema({
     notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'notifications', default: [] }],
     crm_settings: { type: mongoose.Schema.Types.ObjectId, ref: 'CrmSettings' },
     vendors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vendors', default: [] }],
+    terms_and_conditions : { type: mongoose.Schema.Types.ObjectId, ref: 'terms_and_conditions', default: "" },
+    about_us : { type: mongoose.Schema.Types.ObjectId, ref: 'about_us_collection', default: "" },
   });
 
   investorSchema.pre('save', async function (next) {

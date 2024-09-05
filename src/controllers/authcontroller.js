@@ -10,7 +10,7 @@ const bcrypt = require('bcrypt');
 const CrmSettings = require('../models/crm_schema');
 
 const generateAccessToken = (investor) => {
-    return jwt.sign({ id: investor.id, investor_uid: investor.investor_uid }, 'mutual_fund_jwt_secret_key', { expiresIn: '1h' }); // Replace with a strong secret key
+    return jwt.sign({ id: investor.id, investor_uid: investor.investor_uid }, 'mutual_fund_jwt_secret_key', { expiresIn: '24h' }); // Replace with a strong secret key
 };
   
 const ChangePassword = async (req, res) => {

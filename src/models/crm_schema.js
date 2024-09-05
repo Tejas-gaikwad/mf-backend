@@ -20,7 +20,7 @@ const riskProfileRuleSchema = new mongoose.Schema({
 const crmSettingsSchema = new mongoose.Schema({
     crm_setting_uid: { type: mongoose.Schema.Types.ObjectId, ref: 'Investor' },
     categoryRuleSchema: [categoryRuleSchema],
-    riskProfileRuleSchema: [riskProfileRuleSchema]
+    riskProfileRuleSchema: [riskProfileRuleSchema],
 });
 
 module.exports = mongoose.model('CrmSettings', crmSettingsSchema);

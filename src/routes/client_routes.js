@@ -6,7 +6,7 @@ const router = express.Router();
 
 
 router.post('/add_client', authenticateToken, AddClient);
-router.put('/updateClientDetails/', authenticateToken, );
+// router.put('/updateClientDetails/', authenticateToken, );
 router.get('/getClientDetails/', authenticateToken, );
 router.get('/getAllClients/', authenticateToken, ListOfAllClients);;
 router.post('/:clientId/sendClientLoginCredentials', authenticateToken,);
