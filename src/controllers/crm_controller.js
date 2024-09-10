@@ -511,13 +511,13 @@ const GetAllItemsVendor = async (req, res) => {
             data : vendor.items,
         });
 
-    }catch(err) {
+    } catch(err) {
         console.error(err);
         return res.json({
             "status" : false,
             "message" : "Something went wrong",
             "error" : err.message
-        })
+        });
     }
 }
 

@@ -12,6 +12,7 @@ const investorSchema = new mongoose.Schema({
     city : {type: String, },
     login_type : {type: String,  },
     password : {type: String,},
+    merged_clients_ids: [{ type: mongoose.Schema.Types.ObjectId, ref: 'MergedClients', default: [] }],
     clients: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Client', default: [] }],
     notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'notifications', default: [] }],
     crm_settings: { type: mongoose.Schema.Types.ObjectId, ref: 'CrmSettings' },
