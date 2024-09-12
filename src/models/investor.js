@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 
 const investorSchema = new mongoose.Schema({
     investor_uid: { type:  mongoose.Schema.Types.ObjectId,  unique: true },
-    arnNumber: { type: String,  unique: true },
+    arnNumber: { type: String },
     full_name: { type: String, },
     mobile: { type: String,  unique: true },
     city : {type: String, },
@@ -18,8 +18,8 @@ const investorSchema = new mongoose.Schema({
     notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'notifications', default: [] }],
     crm_settings: { type: mongoose.Schema.Types.ObjectId, ref: 'CrmSettings' },
     vendors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vendors', default: [] }],
-    terms_and_conditions : { type: mongoose.Schema.Types.ObjectId, ref: 'terms_and_conditions', default: "" },
-    about_us : { type: mongoose.Schema.Types.ObjectId, ref: 'about_us_collection', default: "" },
+    terms_and_conditions : { type: mongoose.Schema.Types.ObjectId, ref: 'terms_and_conditions', default: null },
+    about_us : { type: mongoose.Schema.Types.ObjectId, ref: 'about_us_collection', default: null },
   });
 
   investorSchema.pre('save', async function (next) {

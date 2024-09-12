@@ -67,6 +67,7 @@ const clientSchema = new mongoose.Schema({
     investor_uid: { type: String, ref: 'Users', required: true },
     client_video_kyc__data_uid: { type: String, ref: 'ClientVideoKYC' },
     arn_number : { type: String,  required: true },
+    relation_ship_with_head :  { type: String,  default:""},
     user_details: userDetailsSchema,
     fatca_detials : fatcaSchema,
     bank_details : bankDetailsSchema,

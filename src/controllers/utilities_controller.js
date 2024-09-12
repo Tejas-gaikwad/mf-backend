@@ -5,6 +5,31 @@ const FamilySchema = require('../models/family_members');
 
 const mongoose = require('mongoose')
 
+const SearchClientByType = async (req, res) => {
+  try{
+
+      const investor_uid = req.investor.investor_uid; 
+      const {searchQuery, searchBy} = req.body;
+
+      let query = { investor_uid: investor_uid };
+
+      if (searchQuery) {
+
+        const searchField = `user_details.${searchBy}`;
+        query[searchField] = { $regex: new RegExp(searchQuery, 'i') };
+      }
+
+      const clients = await ClientSchema.find(query);
+
+      return res.status(200).json(clients);
+
+  } catch(err) {
+      return res.status(200).json({
+          "message" : "Error, Something went wrong.",
+          "message" : err.message,
+      });
+  }
+}
 
 const MergeClients = async (req, res) => {
     try{
@@ -234,7 +259,6 @@ const GetFamilyMembersByClient = async (req, res) => {
     try {
       const { clientId } = req.params;
 
-      console.log('familyHeadId  --   '+ clientId);
   
       const family = await FamilySchema.findOne({ head_client: clientId })
         .populate('head_client')
@@ -262,22 +286,13 @@ const GetFamilyMembersByClient = async (req, res) => {
 const DeleteFamily = async (req, res) => {
   try {
     const { clientId } = req.params;
-    const {investor_uid} = req.investor.investor_uid;
-  
     if (!clientId) {
       return res.status(404).json({ error: 'Client ID is required' });
     }
-
     console.log("clientId  ----    "+ clientId);
-
-
     const family = await FamilySchema.findOne({ head_client: clientId });
-       
-
     console.log("family._id  ----    "+ family);
-
     await  FamilySchema.findByIdAndDelete(family._id);
-
     await InvestorSchema.updateOne(
       { _id: new mongoose.Types.ObjectId(investor_uid) },
       { $pull: { family_ids: family._id } }
@@ -297,4 +312,35 @@ const DeleteFamily = async (req, res) => {
   }
 };
 
-module.exports = { MergeClients, GetMergedClients, DifferClient, GetAllMergeClients, CreateFamily, GetAllFamilies, GetFamilyMembersByClient, DeleteFamily};
+const UpdateFamily = async (req, res) => {
+  try {
+    const { clientId } = req.body;
+    if (!clientId) {
+      return res.status(404).json({ error: 'Client ID is required' });
+    }
+    console.log("clientId  ----    "+ clientId);
+    const family = await FamilySchema.findOneAndUpdate(
+      { family_members_client_list: clientId },
+      { $pull: { family_members_client_list: clientId } },
+      { new: true } 
+    );
+    if (!family) {
+      return res.status(404).json({ message: "Client not found in any family." });
+    }
+    return res.status(200).json({
+      "status" : true,
+      "message": "Member successfully removed from the family.",
+      "family" : family
+    });
+  
+    
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: 'Error, something went wrong.',
+      error: err.message,
+    });
+  }
+};
+
+module.exports = { MergeClients, GetMergedClients, DifferClient, GetAllMergeClients, CreateFamily, GetAllFamilies, GetFamilyMembersByClient, DeleteFamily, SearchClientByType, UpdateFamily};

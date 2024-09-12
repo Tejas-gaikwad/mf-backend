@@ -107,7 +107,10 @@ const ListOfAllClients = async (req, res) => {
       if (!data) {
         return res.status(404).json({ message: 'Investor not found' });
       }
-      res.status(200).json({ clients: data.clients });
+      return res.status(200).json({ 
+        status : true,
+        clients: data.clients
+       });
     } catch (error) {
       console.error('Error getting clients:', error);
       res.status(500).json({ message: 'Failed to get clients' });
