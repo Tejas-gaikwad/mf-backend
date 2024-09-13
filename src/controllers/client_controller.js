@@ -6,8 +6,6 @@ const MutualFundMember = require('../models/mutual_fund');
 const nodemailer = require('nodemailer');
 
 
-
-
 const AddClient = async (req, res) => {
     try{
         const investor_uid = req.investor.investor_uid;

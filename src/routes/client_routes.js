@@ -3,8 +3,6 @@ const{ authenticateToken,  } = require('../middlewares/auth_middleware');
 const { updateClientVideoKycData } = require('../controllers/video_kyc_controller');
 const express = require('express');
 const router = express.Router();
-
-
 router.post('/add_client', authenticateToken, AddClient);
 // router.put('/updateClientDetails/', authenticateToken, );
 router.get('/getClientDetails/', authenticateToken, );

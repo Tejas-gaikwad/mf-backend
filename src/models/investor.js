@@ -15,6 +15,7 @@ const investorSchema = new mongoose.Schema({
     merged_clients_ids: [{ type: mongoose.Schema.Types.ObjectId, ref: 'MergedClients', default: [] }],
     family_ids: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FamilySchema', default: [] }],
     clients: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Client', default: [] }],
+    employees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Employee', default: [] }],
     notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'notifications', default: [] }],
     crm_settings: { type: mongoose.Schema.Types.ObjectId, ref: 'CrmSettings' },
     vendors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vendors', default: [] }],

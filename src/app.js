@@ -9,6 +9,7 @@ const researchRoutes = require('./routes/research_routes');
 const transactionRoutes = require('./routes/transaction_routes');
 const crmRoutes = require('./routes/crm_routes');
 const utilitiesRoutes = require('./routes/utilities_routes');
+const employeeRoutes = require('./routes/employee_routes');
 const session = require('express-session');
 
 const app = express();
@@ -30,6 +31,8 @@ app.use('/api', researchRoutes);
 app.use('/api', transactionRoutes);
 app.use('/api', crmRoutes);
 app.use('/api', utilitiesRoutes);
+app.use('/api', employeeRoutes);
+
 
 
 

@@ -83,9 +83,9 @@ const MergeClients = async (req, res) => {
 
 const GetMergedClients = async (req, res) => {
     try {
-      const { mergedClientId } = req.params;
+      const { mergedDocumentId } = req.params;
   
-      const mergedClientDocument = await MergedClients.findById(mergedClientId)
+      const mergedClientDocument = await MergedClients.findById(mergedDocumentId)
         .populate('main_client')
         .populate('merged_client_list');
   
