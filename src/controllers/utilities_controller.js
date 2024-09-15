@@ -106,73 +106,73 @@ const GetMergedClients = async (req, res) => {
     }
 };
   
-const DifferClient = async (req, res) => {
-    try {
-      const { main_client_id } = req.body;
+  const DifferClient = async (req, res) => {
+      try {
+        const { main_client_id } = req.body;
+      
+        if (!main_client_id) {
+          return res.status(404).json({ error: 'Client ID is required' });
+        }
+
+        const mergedClientDocument = await MergedClients.findOne({ main_client: main_client_id });
+
+        if (!mergedClientDocument) {
+          return res.status(404).json({ error: 'No merged client document found for the given client ID' });
+        }
+
+        const { investor_id } = mergedClientDocument;
+
+        await MergedClients.findByIdAndDelete(mergedClientDocument._id);
+
+        await InvestorSchema.updateOne(
+          { _id: new mongoose.Types.ObjectId(investor_id) },
+          { $pull: { merged_clients_ids: mergedClientDocument._id } }
+        );
     
-      if (!main_client_id) {
-        return res.status(404).json({ error: 'Client ID is required' });
+        return res.status(200).json({
+          status: true,
+          message: 'Merged client document deleted successfully and client removed from investor\'s merged list',
+        });
+        
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          message: 'Error, something went wrong.',
+          error: err.message,
+        });
       }
+  };
 
-      const mergedClientDocument = await MergedClients.findOne({ main_client: main_client_id });
-
-      if (!mergedClientDocument) {
-        return res.status(404).json({ error: 'No merged client document found for the given client ID' });
+  const GetAllMergeClients = async (req, res) => {
+      try {
+        const investor_uid = req.investor.investor_uid;
+        const investor = await InvestorSchema.findOne( {investor_uid} )
+              .populate({
+                  path: 'merged_clients_ids',
+                  populate: [
+                      { path: 'main_client', model: 'Client' }, // Populate main client details
+                      { path: 'merged_client_list', model: 'Client' } // Populate merged clients details
+                  ]
+              });
+    
+        if (!investor) {
+          return res.status(404).json({ message: 'Investor not found' });
+        }
+        const mergedClients = investor.merged_clients_ids;
+        return res.status(200).json({
+          status: true,
+          message: 'Merged clients retrieved successfully',
+          data: mergedClients
+        });
+        
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          message: 'Error, something went wrong.',
+          error: err.message,
+        });
       }
-
-      const { investor_id } = mergedClientDocument;
-
-      await MergedClients.findByIdAndDelete(mergedClientDocument._id);
-
-      await InvestorSchema.updateOne(
-        { _id: new mongoose.Types.ObjectId(investor_id) },
-        { $pull: { merged_clients_ids: mergedClientDocument._id } }
-      );
-  
-      return res.status(200).json({
-        status: true,
-        message: 'Merged client document deleted successfully and client removed from investor\'s merged list',
-      });
-      
-    } catch (err) {
-      return res.status(500).json({
-        status: false,
-        message: 'Error, something went wrong.',
-        error: err.message,
-      });
-    }
-};
-
-const GetAllMergeClients = async (req, res) => {
-    try {
-      const investor_uid = req.investor.investor_uid;
-      const investor = await InvestorSchema.findOne( {investor_uid} )
-            .populate({
-                path: 'merged_clients_ids',
-                populate: [
-                    { path: 'main_client', model: 'Client' }, // Populate main client details
-                    { path: 'merged_client_list', model: 'Client' } // Populate merged clients details
-                ]
-            });
-   
-      if (!investor) {
-        return res.status(404).json({ message: 'Investor not found' });
-      }
-      const mergedClients = investor.merged_clients_ids;
-      return res.status(200).json({
-        status: true,
-        message: 'Merged clients retrieved successfully',
-        data: mergedClients
-      });
-      
-    } catch (err) {
-      return res.status(500).json({
-        status: false,
-        message: 'Error, something went wrong.',
-        error: err.message,
-      });
-    }
-};
+  };
 
   const CreateFamily = async (req, res) => {
     try{
@@ -180,37 +180,35 @@ const GetAllMergeClients = async (req, res) => {
         if ( !familyHeadClientId || !familyMembersClientId) {
             return res.status(400).json({ error: 'Invalid input' });
         }
+        const existingFamily = await FamilySchema.findOne({ head_client: familyHeadClientId });
+        if (existingFamily) {
+            return res.status(400).json({ error: 'Head client already belongs to a family, add members to the family.'});
+        }
         const investor_uid = req.investor.investor_uid;
         const investor = await InvestorSchema.findOne({investor_uid});
         if (!investor) {
           return res.status(404).json({ message: 'Investor not found' });
         }
-
         const headClientDocument = await ClientSchema.findById(familyHeadClientId);
-
         if (!headClientDocument) {
             return res.status(404).json({ message: 'Family Head client not found' });
         }
-
         const membersClientDocuments = await ClientSchema.find({ _id: { $in: familyMembersClientId.map(c => c) } });
+        console.log("membersClientDocuments    -------    "+ membersClientDocuments);
         if (membersClientDocuments.length !== membersClientDocuments.length) {
             return res.status(404).json({ message: 'One or more members clients not found' });
         }
-
         const familyDocument = new FamilySchema({
             head_client: headClientDocument._id,
             family_members_client_list: membersClientDocuments.map(c => c._id),
             investor_id: investor._id
         });
-
         const savedDocument = await familyDocument.save();
         const documentId = savedDocument._id;
-
         await InvestorSchema.updateOne(
             { _id: investor._id },
             { $push: { family_ids: documentId } }
         );
-
             
         return res.status(201).json({
             "status" : true,
