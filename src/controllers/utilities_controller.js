@@ -194,7 +194,6 @@ const FamilySchema = require('../models/family_members');
             return res.status(404).json({  "status" : false, message: 'Family Head client not found' });
         }
         const membersClientDocuments = await ClientSchema.find({ _id: { $in: familyMembersClientId.map(c => c) } });
-        console.log("membersClientDocuments    -------    "+ membersClientDocuments);
         if (membersClientDocuments.length !== membersClientDocuments.length) {
             return res.status(404).json({ message: 'One or more members clients not found' });
         }
@@ -321,13 +320,13 @@ const FamilySchema = require('../models/family_members');
       const family = await FamilySchema.findOne({ head_client: headMemberId });
        
       if (!family) {
-        return res.status(404).json({ error: 'Family not found for the provided head client' });
+        return res.status(404).json({ status: false, error: 'Family not found for the provided head client' });
       }
 
       const memberExists = family.family_members_client_list.includes(deleteMemberId);
       
       if (!memberExists) {
-        return res.status(404).json({ error: 'Member not found in the family' });
+        return res.status(404).json({ status: false, error: 'Member not found in the family' });
       }
 
       await FamilySchema.updateOne(
