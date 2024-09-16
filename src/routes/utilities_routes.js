@@ -13,7 +13,7 @@ router.post('/create_family', authenticateToken, CreateFamily);
 router.get('/get_all_families', authenticateToken, GetAllFamilies);
 router.get('/get_family_members_by_client/:clientId', authenticateToken, GetFamilyMembersByClient);
 router.delete('/delete_family/:clientId', authenticateToken, DeleteFamily);
-router.delete('/delete_family_member', authenticateToken, DeleteFamilyMember);
+router.post('/delete_family_member', authenticateToken, DeleteFamilyMember);
 router.post('/update_family', authenticateToken, UpdateFamily);
 
 
