@@ -356,7 +356,7 @@ const FamilySchema = require('../models/family_members');
 
          // Check if headClientId and clientIdList are provided
     if (!headClientId || !clientIdList || clientIdList.length === 0) {
-      return res.status(400).json({
+      return res.status(200).json({
         status: false,
         error: 'Invalid input: headClientId or clientIdList missing'
       });
@@ -365,7 +365,7 @@ const FamilySchema = require('../models/family_members');
     // Find the family document using the headClientId
     const familyDocument = await FamilySchema.findOne({ head_client: headClientId });
     if (!familyDocument) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: false,
         error: 'Family not found with the given head client'
       });
@@ -374,7 +374,7 @@ const FamilySchema = require('../models/family_members');
     // Check if the clients in clientIdList exist in the ClientSchema
     const existingClients = await ClientSchema.find({ _id: { $in: clientIdList } });
     if (existingClients.length !== clientIdList.length) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: false,
         error: 'One or more clients from clientIdList not found'
       });
@@ -385,7 +385,7 @@ const FamilySchema = require('../models/family_members');
     );
 
     if (alreadyInFamily.length > 0) {
-      return res.status(400).json({
+      return res.status(200).json({
         status: false,
         error: `Clients already in family: ${alreadyInFamily.join(', ')}`
       });
