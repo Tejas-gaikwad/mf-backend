@@ -352,32 +352,85 @@ const FamilySchema = require('../models/family_members');
   const UpdateFamily = async (req, res) => {
     try {
 
-      const { clientId, headClientId } = req.body;
+      const { clientIdList, headClientId } = req.body;
 
-      if (!clientId) {
-        return res.status(404).json({ status: false, error: 'Client ID is required' });
-      }
-      const family = await FamilySchema.findOne({ head_client: headClientId });
-      if (!family) {
-        return res.status(404).json({ status: false, error: 'Family not found for the provided head client' });
-      }
-      const memberExists = family.family_members_client_list.includes(clientId);
-      if(memberExists) {
-        return res.status(404).json({ "status" : false, message: "Client already available in family." });
-      }
-      const familyData = await FamilySchema.findOneAndUpdate(
-        { head_client: headClientId },
-        { $push: { family_members_client_list: clientId } },
-        { new: true } 
-      );
-      if (!familyData) {
-        return res.status(404).json({ message: "Client not found in any family." });
-      }
-      return res.status(200).json({
-        "status" : true,
-        "message": "Member successfully added from the family.",
-        "family" : familyData
+         // Check if headClientId and clientIdList are provided
+    if (!headClientId || !clientIdList || clientIdList.length === 0) {
+      return res.status(400).json({
+        status: false,
+        error: 'Invalid input: headClientId or clientIdList missing'
       });
+    }
+
+    // Find the family document using the headClientId
+    const familyDocument = await FamilySchema.findOne({ head_client: headClientId });
+    if (!familyDocument) {
+      return res.status(404).json({
+        status: false,
+        error: 'Family not found with the given head client'
+      });
+    }
+
+    // Check if the clients in clientIdList exist in the ClientSchema
+    const existingClients = await ClientSchema.find({ _id: { $in: clientIdList } });
+    if (existingClients.length !== clientIdList.length) {
+      return res.status(404).json({
+        status: false,
+        error: 'One or more clients from clientIdList not found'
+      });
+    }
+
+    const alreadyInFamily = clientIdList.filter(clientId => 
+      familyDocument.family_members_client_list.includes(clientId)
+    );
+
+    if (alreadyInFamily.length > 0) {
+      return res.status(400).json({
+        status: false,
+        error: `Clients already in family: ${alreadyInFamily.join(', ')}`
+      });
+    }
+
+    // Add new members to the family_members_client_list
+    familyDocument.family_members_client_list = [
+      ...new Set([...familyDocument.family_members_client_list, ...clientIdList])
+    ];
+
+    // Save the updated family document
+    await familyDocument.save();
+
+    return res.status(200).json({
+      status: true,
+      data: 'Family members added successfully'
+    });
+
+
+      // if (!clientIdList) {
+      //   return res.status(404).json({ status: false, error: 'Client ID is required' });
+      // }
+      // const family = await FamilySchema.findOne({ head_client: headClientId });
+      // if (!family) {
+      //   return res.status(404).json({ status: false, error: 'Family not found for the provided head client' });
+      // }
+
+      
+      // const memberExists = family.family_members_client_list.includes(clientId);
+      // if(memberExists) {
+      //   return res.status(404).json({ "status" : false, message: "Client already available in family." });
+      // }
+      // const familyData = await FamilySchema.findOneAndUpdate(
+      //   { head_client: headClientId },
+      //   { $push: { family_members_client_list: clientIdList } },
+      //   { new: true } 
+      // );
+      // if (!familyData) {
+      //   return res.status(404).json({ message: "Client not found in any family." });
+      // }
+      // return res.status(200).json({
+      //   "status" : true,
+      //   "message": "Member successfully added from the family.",
+      //   "family" : familyData
+      // });
     } catch (err) {
       return res.status(500).json({
         status: false,
