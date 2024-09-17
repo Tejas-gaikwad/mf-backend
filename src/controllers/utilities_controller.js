@@ -351,26 +351,33 @@ const FamilySchema = require('../models/family_members');
 
   const UpdateFamily = async (req, res) => {
     try {
-      const { clientId } = req.body;
+
+      const { clientId, headClientId } = req.body;
+
       if (!clientId) {
-        return res.status(404).json({ error: 'Client ID is required' });
+        return res.status(404).json({ status: false, error: 'Client ID is required' });
       }
-      console.log("clientId  ----    "+ clientId);
-      const family = await FamilySchema.findOneAndUpdate(
-        { family_members_client_list: clientId },
-        { $pull: { family_members_client_list: clientId } },
+      const family = await FamilySchema.findOne({ head_client: headClientId });
+      if (!family) {
+        return res.status(404).json({ status: false, error: 'Family not found for the provided head client' });
+      }
+      const memberExists = family.family_members_client_list.includes(clientId);
+      if(memberExists) {
+        return res.status(404).json({ "status" : false, message: "Client already available in family." });
+      }
+      const familyData = await FamilySchema.findOneAndUpdate(
+        { head_client: headClientId },
+        { $push: { family_members_client_list: clientId } },
         { new: true } 
       );
-      if (!family) {
+      if (!familyData) {
         return res.status(404).json({ message: "Client not found in any family." });
       }
       return res.status(200).json({
         "status" : true,
-        "message": "Member successfully removed from the family.",
-        "family" : family
+        "message": "Member successfully added from the family.",
+        "family" : familyData
       });
-    
-      
     } catch (err) {
       return res.status(500).json({
         status: false,
