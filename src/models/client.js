@@ -73,6 +73,7 @@ const clientSchema = new mongoose.Schema({
     bank_details : bankDetailsSchema,
     client_desk_settings : clientDeskSettingsSchema,
     upload_documents : uploadedDocumentsSchema,
+    investments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'MFSchemeInvestment' }]
 });
 
 module.exports = mongoose.model('Client', clientSchema);
