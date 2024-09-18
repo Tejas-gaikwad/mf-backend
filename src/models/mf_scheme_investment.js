@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const mfSchemeinvestmentSchema = new mongoose.Schema({
   scheme_name: { type: String, required: true },
+  scheme_type: { type: String, required: true },
+  scheme_sub_type: { type: String, required: true },
   folio_number: { type: String, required: true },
   inv_since: { type: Date, required: true },
   purchase: { type: Number, required: true },
