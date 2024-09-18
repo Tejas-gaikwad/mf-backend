@@ -362,6 +362,15 @@ const FamilySchema = require('../models/family_members');
       });
     }
 
+      // Check if headClientId is in the clientIdList
+      if (clientIdList.includes(headClientId)) {
+        return res.status(200).json({
+          status: false,
+          error: 'Head client cannot be added as a family member'
+        });
+      }
+  
+
     // Find the family document using the headClientId
     const familyDocument = await FamilySchema.findOne({ head_client: headClientId });
     if (!familyDocument) {
