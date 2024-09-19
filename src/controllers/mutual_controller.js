@@ -181,6 +181,9 @@ const FilterGetMFDetailsOfClient = async (req, res, next) => {
 
 
 
+
+
+
 const GetFundsListOfClientOfInvestments = async (req, res, next) => {
   try {
       const { clientId } = req.params;
